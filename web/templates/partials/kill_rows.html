@@ -16,7 +16,7 @@
   <tbody>
     {{range .Kills}}
     <tr>
-      <td>{{fmtEventTime .Time}}</td>
+      <td><span data-time-iso="{{timeISO .Time}}" data-time-style="time">{{fmtEventTime .Time}}</span></td>
       <td>{{if .KillerName}}{{.KillerName}}{{else}}<em>world</em>{{end}}</td>
       <td class="team-{{.KillerTeam}}">{{.KillerTeam}}</td>
       <td>{{.VictimName}}</td>

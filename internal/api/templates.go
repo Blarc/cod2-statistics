@@ -34,6 +34,12 @@ func mustParseTemplates(fsys fs.FS) *template.Template {
 			}
 			return t.Local().Format("15:04:05")
 		},
+		"timeISO": func(t *time.Time) string {
+			if t == nil || t.IsZero() {
+				return ""
+			}
+			return t.UTC().Format(time.RFC3339Nano)
+		},
 		"toJSON": func(v any) template.JS {
 			b, _ := json.Marshal(v)
 			return template.JS(b)

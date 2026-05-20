@@ -16,7 +16,9 @@
         <tr>
           <td><a href="/matches/{{.ID}}">{{.MapName}}</a></td>
           <td>{{.GameType}}</td>
-          <td>{{fmtDateTime .StartedAt}}</td>
+          <td>
+            <span data-time-iso="{{timeISO .StartedAt}}" data-time-style="datetime">{{fmtDateTime .StartedAt}}</span>
+          </td>
         </tr>
         {{end}}
       </tbody>
@@ -56,7 +58,9 @@
   <strong>Poll Status</strong> &mdash;
   {{if .Poll.Ready}}
   <span class="poll-ready">&#10003; Active</span> &mdash;
-  {{if .Poll.LastPollTime}}Last poll: {{.Poll.LastPollTime.Format "2006-01-02 15:04:05 UTC"}}{{end}} &mdash;
+  {{if .Poll.LastPollTime}}Last poll:
+  <span data-time-iso="{{timeISO .Poll.LastPollTime}}" data-time-style="datetime">{{fmtDateTime .Poll.LastPollTime}}</span>
+  {{end}} &mdash;
   {{.Poll.PollCount}} polls completed
   {{else}}
   <span class="poll-error">No poll completed yet</span>

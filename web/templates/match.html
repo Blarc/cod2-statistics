@@ -6,8 +6,8 @@
 <div class="match-meta">
   <div class="match-meta-item">Map <span>{{.Detail.MapName}}</span></div>
   <div class="match-meta-item">Type <span>{{.Detail.GameType}}</span></div>
-  <div class="match-meta-item">Start <span>{{fmtDateTime .Detail.StartedAt}}</span></div>
-  <div class="match-meta-item">End <span>{{fmtDateTime .Detail.EndedAt}}</span></div>
+  <div class="match-meta-item">Start <span data-time-iso="{{timeISO .Detail.StartedAt}}" data-time-style="datetime">{{fmtDateTime .Detail.StartedAt}}</span></div>
+  <div class="match-meta-item">End <span data-time-iso="{{timeISO .Detail.EndedAt}}" data-time-style="datetime">{{fmtDateTime .Detail.EndedAt}}</span></div>
   <div class="match-meta-item">ID <span>{{.Detail.ID}}</span></div>
 </div>
 

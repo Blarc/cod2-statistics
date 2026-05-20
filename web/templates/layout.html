@@ -22,6 +22,42 @@
 
 {{define "footer"}}
 </main>
+<script>
+(function () {
+  var dtFormatter = new Intl.DateTimeFormat(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+  var timeFormatter = new Intl.DateTimeFormat(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+
+  function formatTimes(root) {
+    var scope = root || document;
+    var els = scope.querySelectorAll('[data-time-iso]');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      var iso = el.getAttribute('data-time-iso');
+      if (!iso) continue;
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) continue;
+      var style = el.getAttribute('data-time-style');
+      el.textContent = style === 'time' ? timeFormatter.format(d) : dtFormatter.format(d);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () { formatTimes(document); });
+  document.addEventListener('htmx:afterSwap', function (evt) { formatTimes(evt.target); });
+})();
+</script>
 </body>
 </html>
 {{end}}
