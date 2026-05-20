@@ -56,7 +56,7 @@ func (p *Poller) pollOnce(ctx context.Context) error {
 
 	var startTime time.Time
 	if status.LastPollTime != nil {
-		startTime = status.LastPollTime.Add(1 * time.Nanosecond)
+		startTime = status.LastPollTime.Add(-p.cfg.LokiPollOverlap)
 	} else {
 		startTime = time.Now().Add(-p.cfg.LokiInitialLookback)
 	}

@@ -17,6 +17,7 @@ type Config struct {
 	LokiPassword        string
 	PollInterval        time.Duration
 	LokiInitialLookback time.Duration
+	LokiPollOverlap     time.Duration
 }
 
 type yamlFile struct {
@@ -31,6 +32,7 @@ type yamlFile struct {
 		Password        string `yaml:"password"`
 		PollInterval    string `yaml:"poll_interval"`
 		InitialLookback string `yaml:"initial_lookback"`
+		PollOverlap     string `yaml:"poll_overlap"`
 	} `yaml:"loki"`
 }
 
@@ -40,6 +42,7 @@ func Load(path string) (*Config, error) {
 		DBPath:              "/data/cod2stats.db",
 		PollInterval:        10 * time.Second,
 		LokiInitialLookback: 24 * time.Hour,
+		LokiPollOverlap:     2 * time.Second,
 	}
 
 	if path != "" {
@@ -83,6 +86,13 @@ func Load(path string) (*Config, error) {
 			}
 			cfg.LokiInitialLookback = d
 		}
+		if yc.Loki.PollOverlap != "" {
+			d, err := time.ParseDuration(yc.Loki.PollOverlap)
+			if err != nil {
+				return nil, fmt.Errorf("parse poll_overlap: %w", err)
+			}
+			cfg.LokiPollOverlap = d
+		}
 	}
 
 	if v := os.Getenv("LOKI_URL"); v != "" {
@@ -110,6 +120,13 @@ func Load(path string) (*Config, error) {
 			return nil, fmt.Errorf("parse LOKI_INITIAL_LOOKBACK: %w", err)
 		}
 		cfg.LokiInitialLookback = d
+	}
+	if v := os.Getenv("LOKI_POLL_OVERLAP"); v != "" {
+		d, err := time.ParseDuration(v)
+		if err != nil {
+			return nil, fmt.Errorf("parse LOKI_POLL_OVERLAP: %w", err)
+		}
+		cfg.LokiPollOverlap = d
 	}
 	if v := os.Getenv("DB_PATH"); v != "" {
 		cfg.DBPath = v

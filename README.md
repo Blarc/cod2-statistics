@@ -39,6 +39,7 @@ Settings are read from environment variables. A YAML file can be supplied via `C
 | `LOKI_USERNAME` / `LOKI_PASSWORD` | — | Basic auth credentials |
 | `POLL_INTERVAL` | `10s` | How often to query Loki |
 | `LOKI_INITIAL_LOOKBACK` | `24h` | Lookback window on first poll |
+| `LOKI_POLL_OVERLAP` | `2s` | Re-query overlap window on every poll to avoid late-ingest misses |
 | `DB_PATH` | `/data/cod2stats.db` | SQLite file path |
 | `LISTEN_ADDR` | `:8080` | HTTP bind address |
 | `CONFIG_FILE` | — | Optional YAML config file path |

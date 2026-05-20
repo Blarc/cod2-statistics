@@ -86,33 +86,6 @@ func (s *Store) SaveMatch(m *model.Match) error {
 			ps.NormalizedName, string(aliasJSON)); err != nil {
 			return fmt.Errorf("upsert player %q: %w", ps.NormalizedName, err)
 		}
-
-		var playerID int64
-		if err := tx.QueryRow(`SELECT id FROM players WHERE normalized_name = ?`,
-			ps.NormalizedName).Scan(&playerID); err != nil {
-			return fmt.Errorf("get player id %q: %w", ps.NormalizedName, err)
-		}
-
-		weaponJSON, _ := json.Marshal(ps.WeaponKills)
-		if _, err := tx.Exec(`
-			INSERT INTO match_player_stats
-				(match_id, player_id, kills, deaths, damage_dealt, damage_taken,
-				 headshots, weapon_kills, first_seen, last_seen, event_count)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-			ON CONFLICT(match_id, player_id) DO UPDATE SET
-				kills        = kills + excluded.kills,
-				deaths       = deaths + excluded.deaths,
-				damage_dealt = damage_dealt + excluded.damage_dealt,
-				damage_taken = damage_taken + excluded.damage_taken,
-				headshots    = headshots + excluded.headshots,
-				last_seen    = MAX(last_seen, excluded.last_seen),
-				event_count  = event_count + excluded.event_count`,
-			m.ID, playerID,
-			ps.Kills, ps.Deaths, ps.DamageDealt, ps.DamageTaken,
-			ps.Headshots, string(weaponJSON),
-			ps.FirstSeen, ps.LastSeen, ps.EventCount); err != nil {
-			return fmt.Errorf("upsert stats: %w", err)
-		}
 	}
 
 	// --- kill events ---
@@ -158,7 +131,172 @@ func (s *Store) SaveMatch(m *model.Match) error {
 		}
 	}
 
+	if err := s.rebuildMatchPlayerStats(tx, m.ID); err != nil {
+		return fmt.Errorf("rebuild stats: %w", err)
+	}
+
 	return tx.Commit()
+}
+
+type playerAggregate struct {
+	Kills       int
+	Deaths      int
+	DamageDealt int
+	DamageTaken int
+	Headshots   int
+	WeaponKills map[string]int
+	FirstSeen   int
+	LastSeen    int
+	EventCount  int
+}
+
+func (ps *playerAggregate) markSeen(clock int) {
+	if ps.FirstSeen == 0 || clock < ps.FirstSeen {
+		ps.FirstSeen = clock
+	}
+	if clock > ps.LastSeen {
+		ps.LastSeen = clock
+	}
+}
+
+func ensureAggPlayer(stats map[string]*playerAggregate, name string) *playerAggregate {
+	p := stats[name]
+	if p == nil {
+		p = &playerAggregate{WeaponKills: make(map[string]int)}
+		stats[name] = p
+	}
+	return p
+}
+
+func (s *Store) rebuildMatchPlayerStats(tx *sql.Tx, matchID string) error {
+	stats := make(map[string]*playerAggregate)
+
+	killRows, err := tx.Query(`
+		SELECT COALESCE(clock,0), COALESCE(victim_name,''), COALESCE(killer_name,''),
+		       COALESCE(weapon,''), COALESCE(mod,''), COALESCE(hit_loc,'')
+		FROM kill_events
+		WHERE match_id = ?`, matchID)
+	if err != nil {
+		return fmt.Errorf("query kill events: %w", err)
+	}
+	for killRows.Next() {
+		var clock int
+		var victim, killer, weapon, mod, hitLoc string
+		if err := killRows.Scan(&clock, &victim, &killer, &weapon, &mod, &hitLoc); err != nil {
+			killRows.Close()
+			return fmt.Errorf("scan kill event: %w", err)
+		}
+		if victim != "" {
+			v := ensureAggPlayer(stats, victim)
+			v.Deaths++
+			v.EventCount++
+			v.markSeen(clock)
+		}
+		if killer != "" {
+			k := ensureAggPlayer(stats, killer)
+			k.Kills++
+			k.EventCount++
+			k.markSeen(clock)
+			k.WeaponKills[weapon]++
+			if mod == "MOD_HEAD_SHOT" || hitLoc == "head" {
+				k.Headshots++
+			}
+		}
+	}
+	if err := killRows.Close(); err != nil {
+		return fmt.Errorf("close kill events: %w", err)
+	}
+
+	damageRows, err := tx.Query(`
+		SELECT COALESCE(clock,0), COALESCE(victim_name,''), COALESCE(attacker_name,''),
+		       COALESCE(damage,0)
+		FROM damage_events
+		WHERE match_id = ?`, matchID)
+	if err != nil {
+		return fmt.Errorf("query damage events: %w", err)
+	}
+	for damageRows.Next() {
+		var clock, damage int
+		var victim, attacker string
+		if err := damageRows.Scan(&clock, &victim, &attacker, &damage); err != nil {
+			damageRows.Close()
+			return fmt.Errorf("scan damage event: %w", err)
+		}
+		if victim != "" {
+			v := ensureAggPlayer(stats, victim)
+			v.DamageTaken += damage
+			v.EventCount++
+			v.markSeen(clock)
+		}
+		if attacker != "" {
+			a := ensureAggPlayer(stats, attacker)
+			a.DamageDealt += damage
+			a.EventCount++
+			a.markSeen(clock)
+		}
+	}
+	if err := damageRows.Close(); err != nil {
+		return fmt.Errorf("close damage events: %w", err)
+	}
+
+	weaponRows, err := tx.Query(`
+		SELECT COALESCE(clock,0), COALESCE(player_name,'')
+		FROM weapon_events
+		WHERE match_id = ?`, matchID)
+	if err != nil {
+		return fmt.Errorf("query weapon events: %w", err)
+	}
+	for weaponRows.Next() {
+		var clock int
+		var player string
+		if err := weaponRows.Scan(&clock, &player); err != nil {
+			weaponRows.Close()
+			return fmt.Errorf("scan weapon event: %w", err)
+		}
+		if player != "" {
+			p := ensureAggPlayer(stats, player)
+			p.EventCount++
+			p.markSeen(clock)
+		}
+	}
+	if err := weaponRows.Close(); err != nil {
+		return fmt.Errorf("close weapon events: %w", err)
+	}
+
+	if _, err := tx.Exec(`DELETE FROM match_player_stats WHERE match_id = ?`, matchID); err != nil {
+		return fmt.Errorf("delete old stats: %w", err)
+	}
+
+	for name, ps := range stats {
+		if _, err := tx.Exec(
+			`INSERT INTO players (normalized_name, aliases) VALUES (?, '[]')
+			 ON CONFLICT(normalized_name) DO NOTHING`,
+			name,
+		); err != nil {
+			return fmt.Errorf("ensure player %q: %w", name, err)
+		}
+
+		var playerID int64
+		if err := tx.QueryRow(`SELECT id FROM players WHERE normalized_name = ?`, name).Scan(&playerID); err != nil {
+			return fmt.Errorf("get player id %q: %w", name, err)
+		}
+
+		weaponJSON, _ := json.Marshal(ps.WeaponKills)
+		if _, err := tx.Exec(`
+			INSERT INTO match_player_stats
+				(match_id, player_id, kills, deaths, damage_dealt, damage_taken,
+				 headshots, weapon_kills, first_seen, last_seen, event_count)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			matchID, playerID,
+			ps.Kills, ps.Deaths, ps.DamageDealt, ps.DamageTaken,
+			ps.Headshots, string(weaponJSON),
+			ps.FirstSeen, ps.LastSeen, ps.EventCount,
+		); err != nil {
+			return fmt.Errorf("insert rebuilt stats for %q: %w", name, err)
+		}
+	}
+
+	return nil
 }
 
 func (s *Store) SetOpenMatch(open *OpenMatch) error {

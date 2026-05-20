@@ -45,6 +45,7 @@ main.go
 | `LOKI_USERNAME` / `LOKI_PASSWORD` | — | Basic auth |
 | `POLL_INTERVAL` | `10s` | Loki poll cadence |
 | `LOKI_INITIAL_LOOKBACK` | `24h` | Lookback on first poll |
+| `LOKI_POLL_OVERLAP` | `2s` | Re-query overlap window on every poll |
 | `DB_PATH` | `/data/cod2stats.db` | SQLite path |
 | `LISTEN_ADDR` | `:8080` | HTTP bind address |
 | `CONFIG_FILE` | — | Optional YAML override (see `config.example.yaml`) |
