@@ -78,8 +78,8 @@ func (p *Poller) pollOnce(ctx context.Context) error {
 	}
 
 	var rls []*model.RawLine
-	for _, line := range rawLines {
-		if rl, ok := parser.ParseLine(line); ok {
+	for _, lokiEntry := range rawLines {
+		if rl, ok := parser.ParseLokiEntry(lokiEntry); ok {
 			rls = append(rls, rl)
 		}
 	}
@@ -96,7 +96,6 @@ func (p *Poller) pollOnce(ctx context.Context) error {
 			MapName:   openMatch.MapName,
 			GameType:  openMatch.GameType,
 			StartedAt: openMatch.StartedAt,
-			LastClock: openMatch.LastClock,
 		}
 	}
 
@@ -120,7 +119,6 @@ func (p *Poller) pollOnce(ctx context.Context) error {
 			MapName:   nextCont.MapName,
 			GameType:  nextCont.GameType,
 			StartedAt: nextCont.StartedAt,
-			LastClock: nextCont.LastClock,
 		}
 	}
 	if err := p.store.SetOpenMatch(nextOpen); err != nil {

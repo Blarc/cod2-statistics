@@ -5,6 +5,7 @@ import (
 	"cod2-statistics/internal/store"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func TestSaveMatchUpdatesWindowAndMetadata(t *testing.T) {
@@ -19,8 +20,8 @@ func TestSaveMatchUpdatesWindowAndMetadata(t *testing.T) {
 		ID:        "match-1",
 		MapName:   "",
 		GameType:  "",
-		StartedAt: 100,
-		EndedAt:   110,
+		StartedAt: time.Unix(1710000000, 0).UTC(),
+		EndedAt:   time.Unix(1710000010, 0).UTC(),
 		Players: map[string]*model.PlayerStats{
 			"alpha": {NormalizedName: "alpha", EventCount: 1},
 		},
@@ -33,8 +34,8 @@ func TestSaveMatchUpdatesWindowAndMetadata(t *testing.T) {
 		ID:        "match-1",
 		MapName:   "mp_toujane",
 		GameType:  "dm",
-		StartedAt: 120,
-		EndedAt:   150,
+		StartedAt: time.Unix(1710000020, 0).UTC(),
+		EndedAt:   time.Unix(1710000050, 0).UTC(),
 		Players: map[string]*model.PlayerStats{
 			"alpha": {NormalizedName: "alpha", EventCount: 1},
 		},
@@ -47,11 +48,11 @@ func TestSaveMatchUpdatesWindowAndMetadata(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetMatch: %v", err)
 	}
-	if got.StartedAt != 100 {
-		t.Errorf("StartedAt = %d, want 100", got.StartedAt)
+	if got.StartedAt == nil || !got.StartedAt.Equal(first.StartedAt) {
+		t.Errorf("StartedAt = %v, want %v", got.StartedAt, first.StartedAt)
 	}
-	if got.EndedAt != 150 {
-		t.Errorf("EndedAt = %d, want 150", got.EndedAt)
+	if got.EndedAt == nil || !got.EndedAt.Equal(second.EndedAt) {
+		t.Errorf("EndedAt = %v, want %v", got.EndedAt, second.EndedAt)
 	}
 	if got.MapName != "mp_toujane" {
 		t.Errorf("MapName = %q, want mp_toujane", got.MapName)
@@ -73,8 +74,7 @@ func TestOpenMatchStateRoundTrip(t *testing.T) {
 		MatchID:   "match-open",
 		MapName:   "mp_toujane",
 		GameType:  "dm",
-		StartedAt: 100,
-		LastClock: 130,
+		StartedAt: time.Unix(1710000100, 0).UTC(),
 	}
 	if err := st.SetOpenMatch(want); err != nil {
 		t.Fatalf("SetOpenMatch: %v", err)
@@ -115,15 +115,15 @@ func TestSaveMatchDuplicateEventsDoNotDoubleCountStats(t *testing.T) {
 		ID:        "match-dedupe",
 		MapName:   "mp_toujane",
 		GameType:  "dm",
-		StartedAt: 100,
-		EndedAt:   120,
+		StartedAt: time.Unix(1710000000, 0).UTC(),
+		EndedAt:   time.Unix(1710000020, 0).UTC(),
 		Players: map[string]*model.PlayerStats{
 			"alpha": {NormalizedName: "alpha"},
 			"beta":  {NormalizedName: "beta"},
 		},
 		KillEvents: []*model.KDEvent{
 			{
-				ClockSec:       110,
+				Time:           time.Unix(1710000010, 0).UTC(),
 				VictimNameNorm: "alpha",
 				KillerNameNorm: "beta",
 				Weapon:         "kar98k_mp",
@@ -135,7 +135,7 @@ func TestSaveMatchDuplicateEventsDoNotDoubleCountStats(t *testing.T) {
 		},
 		DamageEvents: []*model.KDEvent{
 			{
-				ClockSec:       111,
+				Time:           time.Unix(1710000011, 0).UTC(),
 				VictimNameNorm: "alpha",
 				KillerNameNorm: "beta",
 				Weapon:         "kar98k_mp",
@@ -147,7 +147,7 @@ func TestSaveMatchDuplicateEventsDoNotDoubleCountStats(t *testing.T) {
 		},
 		WeaponEvents: []*model.WeaponEvent{
 			{
-				ClockSec:       112,
+				Time:           time.Unix(1710000012, 0).UTC(),
 				PlayerNameNorm: "beta",
 				Weapon:         "kar98k_mp",
 				IdempotencyKey: "w1",

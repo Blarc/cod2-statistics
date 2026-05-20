@@ -9,11 +9,11 @@ import (
 )
 
 type MatchSummary struct {
-	ID        string `json:"id"`
-	MapName   string `json:"map_name"`
-	GameType  string `json:"game_type"`
-	StartedAt int    `json:"started_at"`
-	EndedAt   int    `json:"ended_at"`
+	ID        string     `json:"id"`
+	MapName   string     `json:"map_name"`
+	GameType  string     `json:"game_type"`
+	StartedAt *time.Time `json:"started_at,omitempty"`
+	EndedAt   *time.Time `json:"ended_at,omitempty"`
 }
 
 type PlayerMatchStat struct {
@@ -36,27 +36,27 @@ type MatchDetail struct {
 }
 
 type KillEventRow struct {
-	Clock      int    `json:"clock"`
-	VictimName string `json:"victim_name"`
-	VictimTeam string `json:"victim_team"`
-	KillerName string `json:"killer_name"`
-	KillerTeam string `json:"killer_team"`
-	Weapon     string `json:"weapon"`
-	Mod        string `json:"mod"`
-	HitLoc     string `json:"hit_loc"`
-	Damage     int    `json:"damage"`
+	Time       *time.Time `json:"time,omitempty"`
+	VictimName string     `json:"victim_name"`
+	VictimTeam string     `json:"victim_team"`
+	KillerName string     `json:"killer_name"`
+	KillerTeam string     `json:"killer_team"`
+	Weapon     string     `json:"weapon"`
+	Mod        string     `json:"mod"`
+	HitLoc     string     `json:"hit_loc"`
+	Damage     int        `json:"damage"`
 }
 
 type DamageEventRow struct {
-	Clock        int    `json:"clock"`
-	VictimName   string `json:"victim_name"`
-	VictimTeam   string `json:"victim_team"`
-	AttackerName string `json:"attacker_name"`
-	AttackerTeam string `json:"attacker_team"`
-	Weapon       string `json:"weapon"`
-	Mod          string `json:"mod"`
-	HitLoc       string `json:"hit_loc"`
-	Damage       int    `json:"damage"`
+	Time         *time.Time `json:"time,omitempty"`
+	VictimName   string     `json:"victim_name"`
+	VictimTeam   string     `json:"victim_team"`
+	AttackerName string     `json:"attacker_name"`
+	AttackerTeam string     `json:"attacker_team"`
+	Weapon       string     `json:"weapon"`
+	Mod          string     `json:"mod"`
+	HitLoc       string     `json:"hit_loc"`
+	Damage       int        `json:"damage"`
 }
 
 type PlayerSummary struct {
@@ -84,8 +84,7 @@ type OpenMatch struct {
 	MatchID   string
 	MapName   string
 	GameType  string
-	StartedAt int
-	LastClock int
+	StartedAt time.Time
 }
 
 func (s *Store) ListMatches(mapName, gameType string, limit, offset int) ([]MatchSummary, int, error) {
@@ -97,8 +96,8 @@ func (s *Store) ListMatches(mapName, gameType string, limit, offset int) ([]Matc
 	}
 
 	rows, err := s.db.Query(
-		"SELECT id, map_name, game_type, COALESCE(started_at,0), COALESCE(ended_at,0) FROM matches "+
-			where+" ORDER BY started_at DESC LIMIT ? OFFSET ?",
+		"SELECT id, map_name, game_type, started_at_time_ns, ended_at_time_ns FROM matches "+
+			where+" ORDER BY COALESCE(started_at_time_ns,0) DESC LIMIT ? OFFSET ?",
 		append(args, limit, offset)...,
 	)
 	if err != nil {
@@ -109,9 +108,12 @@ func (s *Store) ListMatches(mapName, gameType string, limit, offset int) ([]Matc
 	var out []MatchSummary
 	for rows.Next() {
 		var m MatchSummary
-		if err := rows.Scan(&m.ID, &m.MapName, &m.GameType, &m.StartedAt, &m.EndedAt); err != nil {
+		var startedNS, endedNS sql.NullInt64
+		if err := rows.Scan(&m.ID, &m.MapName, &m.GameType, &startedNS, &endedNS); err != nil {
 			return nil, 0, err
 		}
+		m.StartedAt = nullNSToTimePtr(startedNS)
+		m.EndedAt = nullNSToTimePtr(endedNS)
 		out = append(out, m)
 	}
 	return out, total, rows.Err()
@@ -119,18 +121,21 @@ func (s *Store) ListMatches(mapName, gameType string, limit, offset int) ([]Matc
 
 func (s *Store) GetLatestMatch() (*MatchSummary, error) {
 	var m MatchSummary
+	var startedNS, endedNS sql.NullInt64
 	err := s.db.QueryRow(
-		`SELECT id, map_name, game_type, COALESCE(started_at,0), COALESCE(ended_at,0)
+		`SELECT id, map_name, game_type, started_at_time_ns, ended_at_time_ns
 		 FROM matches
-		 ORDER BY started_at DESC, ended_at DESC
+		 ORDER BY COALESCE(started_at_time_ns,0) DESC, COALESCE(ended_at_time_ns,0) DESC
 		 LIMIT 1`,
-	).Scan(&m.ID, &m.MapName, &m.GameType, &m.StartedAt, &m.EndedAt)
+	).Scan(&m.ID, &m.MapName, &m.GameType, &startedNS, &endedNS)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, fmt.Errorf("get latest match: %w", err)
 	}
+	m.StartedAt = nullNSToTimePtr(startedNS)
+	m.EndedAt = nullNSToTimePtr(endedNS)
 	return &m, nil
 }
 
@@ -138,7 +143,7 @@ func (s *Store) GetOpenMatch() (*OpenMatch, error) {
 	rows, err := s.db.Query(`
 		SELECT key, value
 		FROM poll_state
-		WHERE key IN ('open_match_id','open_map_name','open_game_type','open_started_at','open_last_clock')`)
+		WHERE key IN ('open_match_id','open_map_name','open_game_type','open_started_at_ns')`)
 	if err != nil {
 		return nil, fmt.Errorf("get open match: %w", err)
 	}
@@ -161,15 +166,17 @@ func (s *Store) GetOpenMatch() (*OpenMatch, error) {
 		return nil, nil
 	}
 
-	startedAt, _ := strconv.Atoi(state["open_started_at"])
-	lastClock, _ := strconv.Atoi(state["open_last_clock"])
+	startedAtNS, _ := strconv.ParseInt(state["open_started_at_ns"], 10, 64)
+	startedAt := fromUnixNS(startedAtNS)
+	if startedAt.IsZero() {
+		return nil, nil
+	}
 
 	return &OpenMatch{
 		MatchID:   id,
 		MapName:   state["open_map_name"],
 		GameType:  state["open_game_type"],
 		StartedAt: startedAt,
-		LastClock: lastClock,
 	}, nil
 }
 
@@ -189,15 +196,18 @@ func buildMatchWhere(mapName, gameType string) (string, []any) {
 
 func (s *Store) GetMatch(id string) (*MatchDetail, error) {
 	var m MatchDetail
+	var startedNS, endedNS sql.NullInt64
 	err := s.db.QueryRow(
-		"SELECT id, map_name, game_type, COALESCE(started_at,0), COALESCE(ended_at,0) FROM matches WHERE id = ?", id,
-	).Scan(&m.ID, &m.MapName, &m.GameType, &m.StartedAt, &m.EndedAt)
+		"SELECT id, map_name, game_type, started_at_time_ns, ended_at_time_ns FROM matches WHERE id = ?", id,
+	).Scan(&m.ID, &m.MapName, &m.GameType, &startedNS, &endedNS)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, fmt.Errorf("get match: %w", err)
 	}
+	m.StartedAt = nullNSToTimePtr(startedNS)
+	m.EndedAt = nullNSToTimePtr(endedNS)
 
 	rows, err := s.db.Query(`
 		SELECT p.normalized_name, p.aliases,
@@ -244,10 +254,10 @@ func (s *Store) ListKillEvents(matchID, killer, victim string, limit, offset int
 	}
 
 	rows, err := s.db.Query(
-		"SELECT COALESCE(clock,0), COALESCE(victim_name,''), COALESCE(victim_team,''),"+
+		"SELECT time_ns, COALESCE(victim_name,''), COALESCE(victim_team,''),"+
 			" COALESCE(killer_name,''), COALESCE(killer_team,''),"+
 			" COALESCE(weapon,''), COALESCE(damage,0), COALESCE(mod,''), COALESCE(hit_loc,'')"+
-			" FROM kill_events "+where+" ORDER BY clock LIMIT ? OFFSET ?",
+			" FROM kill_events "+where+" ORDER BY COALESCE(time_ns,0) LIMIT ? OFFSET ?",
 		append(args, limit, offset)...,
 	)
 	if err != nil {
@@ -258,10 +268,12 @@ func (s *Store) ListKillEvents(matchID, killer, victim string, limit, offset int
 	var out []KillEventRow
 	for rows.Next() {
 		var e KillEventRow
-		if err := rows.Scan(&e.Clock, &e.VictimName, &e.VictimTeam,
+		var timeNS sql.NullInt64
+		if err := rows.Scan(&timeNS, &e.VictimName, &e.VictimTeam,
 			&e.KillerName, &e.KillerTeam, &e.Weapon, &e.Damage, &e.Mod, &e.HitLoc); err != nil {
 			return nil, 0, err
 		}
+		e.Time = nullNSToTimePtr(timeNS)
 		out = append(out, e)
 	}
 	return out, total, rows.Err()
@@ -276,10 +288,10 @@ func (s *Store) ListDamageEvents(matchID, attacker, victim string, limit, offset
 	}
 
 	rows, err := s.db.Query(
-		"SELECT COALESCE(clock,0), COALESCE(victim_name,''), COALESCE(victim_team,''),"+
+		"SELECT time_ns, COALESCE(victim_name,''), COALESCE(victim_team,''),"+
 			" COALESCE(attacker_name,''), COALESCE(attacker_team,''),"+
 			" COALESCE(weapon,''), COALESCE(damage,0), COALESCE(mod,''), COALESCE(hit_loc,'')"+
-			" FROM damage_events "+where+" ORDER BY clock LIMIT ? OFFSET ?",
+			" FROM damage_events "+where+" ORDER BY COALESCE(time_ns,0) LIMIT ? OFFSET ?",
 		append(args, limit, offset)...,
 	)
 	if err != nil {
@@ -290,10 +302,12 @@ func (s *Store) ListDamageEvents(matchID, attacker, victim string, limit, offset
 	var out []DamageEventRow
 	for rows.Next() {
 		var e DamageEventRow
-		if err := rows.Scan(&e.Clock, &e.VictimName, &e.VictimTeam,
+		var timeNS sql.NullInt64
+		if err := rows.Scan(&timeNS, &e.VictimName, &e.VictimTeam,
 			&e.AttackerName, &e.AttackerTeam, &e.Weapon, &e.Damage, &e.Mod, &e.HitLoc); err != nil {
 			return nil, 0, err
 		}
+		e.Time = nullNSToTimePtr(timeNS)
 		out = append(out, e)
 	}
 	return out, total, rows.Err()
@@ -379,7 +393,7 @@ func (s *Store) GetPlayer(name string) (*PlayerDetail, error) {
 		JOIN matches m ON m.id = mps.match_id
 		JOIN players p ON p.id = mps.player_id
 		WHERE p.normalized_name = ?
-		ORDER BY m.started_at DESC`, name)
+		ORDER BY COALESCE(m.started_at_time_ns,0) DESC`, name)
 	if err != nil {
 		return nil, fmt.Errorf("get player matches: %w", err)
 	}
@@ -487,4 +501,12 @@ func (s *Store) SetLastPollError(msg string) error {
 		msg,
 	)
 	return err
+}
+
+func nullNSToTimePtr(ns sql.NullInt64) *time.Time {
+	if !ns.Valid || ns.Int64 <= 0 {
+		return nil
+	}
+	t := time.Unix(0, ns.Int64).UTC()
+	return &t
 }

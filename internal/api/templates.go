@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/fs"
+	"time"
 )
 
 func mustParseTemplates(fsys fs.FS) *template.Template {
@@ -21,8 +22,17 @@ func mustParseTemplates(fsys fs.FS) *template.Template {
 			}
 			return fmt.Sprintf("%.1f%%", float64(hs)/float64(kills)*100)
 		},
-		"fmtClock": func(sec int) string {
-			return fmt.Sprintf("%02d:%02d", sec/60, sec%60)
+		"fmtDateTime": func(t *time.Time) string {
+			if t == nil || t.IsZero() {
+				return "—"
+			}
+			return t.Local().Format("02 Jan 2006 15:04:05")
+		},
+		"fmtEventTime": func(t *time.Time) string {
+			if t == nil || t.IsZero() {
+				return "—"
+			}
+			return t.Local().Format("15:04:05")
 		},
 		"toJSON": func(v any) template.JS {
 			b, _ := json.Marshal(v)

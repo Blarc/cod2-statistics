@@ -1,12 +1,14 @@
 package parser
 
 import (
+	"cod2-statistics/internal/loki"
 	"cod2-statistics/internal/model"
 	"crypto/sha256"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var colorCodeRe = regexp.MustCompile(`\^[0-9]`)
@@ -40,11 +42,21 @@ func ParseClock(s string) (int, error) {
 	return mm*60 + ss, nil
 }
 
-// ParseLine tokenises one raw log line into a RawLine.
+// ParseLine tokenises one raw log line into a RawLine with unknown wall-clock time.
 // Returns (nil, false) for plain-text lines, wall-clock timestamp lines,
 // or any line that doesn't begin with a valid MM:SS prefix.
 func ParseLine(line string) (*model.RawLine, bool) {
-	line = strings.TrimSpace(line)
+	return parseLine(line, time.Time{})
+}
+
+// ParseLokiEntry tokenises one Loki entry using its nanosecond wall-clock timestamp.
+func ParseLokiEntry(entry loki.Entry) (*model.RawLine, bool) {
+	t := time.Unix(0, entry.Timestamp).UTC()
+	return parseLine(entry.Line, t)
+}
+
+func parseLine(raw string, lineTime time.Time) (*model.RawLine, bool) {
+	line := strings.TrimSpace(raw)
 	if line == "" {
 		return nil, false
 	}
@@ -58,9 +70,7 @@ func ParseLine(line string) (*model.RawLine, bool) {
 	if spaceIdx < 0 {
 		return nil, false
 	}
-	clockStr := line[:spaceIdx]
-	clockSec, err := ParseClock(clockStr)
-	if err != nil {
+	if _, err := ParseClock(line[:spaceIdx]); err != nil {
 		return nil, false
 	}
 
@@ -72,7 +82,7 @@ func ParseLine(line string) (*model.RawLine, bool) {
 	// InitGame has no semicolons — handle separately.
 	if strings.HasPrefix(payload, "InitGame:") {
 		return &model.RawLine{
-			ClockSec:  clockSec,
+			Time:      lineTime,
 			EventType: "InitGame",
 			Fields:    []string{payload},
 			Raw:       line,
@@ -82,7 +92,7 @@ func ParseLine(line string) (*model.RawLine, bool) {
 	// ShutdownGame
 	if strings.HasPrefix(payload, "ShutdownGame:") {
 		return &model.RawLine{
-			ClockSec:  clockSec,
+			Time:      lineTime,
 			EventType: "ShutdownGame",
 			Raw:       line,
 		}, true
@@ -99,7 +109,7 @@ func ParseLine(line string) (*model.RawLine, bool) {
 	}
 
 	return &model.RawLine{
-		ClockSec:  clockSec,
+		Time:      lineTime,
 		EventType: fields[0],
 		Fields:    fields,
 		Raw:       line,
@@ -120,7 +130,7 @@ func ParseKD(rl *model.RawLine, matchID string) (*model.KDEvent, error) {
 	dmg, _ := strconv.Atoi(rl.Fields[10]) // tolerate non-numeric → 0
 
 	ev := &model.KDEvent{
-		ClockSec:       rl.ClockSec,
+		Time:           rl.Time,
 		IsKill:         rl.Fields[0] == "K",
 		VictimName:     rl.Fields[4],
 		VictimNameNorm: StripColorCodes(rl.Fields[4]),
@@ -133,7 +143,7 @@ func ParseKD(rl *model.RawLine, matchID string) (*model.KDEvent, error) {
 		Mod:            rl.Fields[11],
 		HitLoc:         rl.Fields[12],
 	}
-	ev.IdempotencyKey = IdempotencyKey(matchID, strconv.Itoa(rl.ClockSec), rl.Raw)
+	ev.IdempotencyKey = IdempotencyKey(matchID, rl.Raw)
 	return ev, nil
 }
 
@@ -145,12 +155,12 @@ func ParseWeapon(rl *model.RawLine, matchID string) (*model.WeaponEvent, error) 
 		return nil, fmt.Errorf("Weapon line has %d fields, need 5: %q", len(rl.Fields), rl.Raw)
 	}
 	ev := &model.WeaponEvent{
-		ClockSec:       rl.ClockSec,
+		Time:           rl.Time,
 		PlayerName:     rl.Fields[3],
 		PlayerNameNorm: StripColorCodes(rl.Fields[3]),
 		Weapon:         rl.Fields[4],
 	}
-	ev.IdempotencyKey = IdempotencyKey(matchID, strconv.Itoa(rl.ClockSec), rl.Raw)
+	ev.IdempotencyKey = IdempotencyKey(matchID, rl.Raw)
 	return ev, nil
 }
 
@@ -176,7 +186,8 @@ func ParseInitGame(rl *model.RawLine) (*model.InitGameEvent, error) {
 	}
 
 	return &model.InitGameEvent{
-		ClockSec: rl.ClockSec,
+		Time:     rl.Time,
+		Raw:      rl.Raw,
 		MapName:  meta["mapname"],
 		GameType: meta["g_gametype"],
 		Meta:     meta,

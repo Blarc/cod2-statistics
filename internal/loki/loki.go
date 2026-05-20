@@ -23,10 +23,10 @@ type lokiResponse struct {
 	} `json:"data"`
 }
 
-// entry pairs a nanosecond timestamp with a log line.
-type entry struct {
-	nsTimestamp int64
-	line        string
+// Entry pairs a nanosecond timestamp with a log line.
+type Entry struct {
+	Timestamp int64
+	Line      string
 }
 
 // FetchLines calls the Loki query_range API and returns all matching log lines
@@ -34,7 +34,7 @@ type entry struct {
 //
 // The clock-reset heuristic in matcher.ProcessLines depends on wall-clock order,
 // so callers should NOT additionally call matcher.SortOldestFirst on Loki results.
-func FetchLines(ctx context.Context, cfg Config) ([]string, error) {
+func FetchLines(ctx context.Context, cfg Config) ([]Entry, error) {
 	if cfg.URL == "" {
 		return nil, fmt.Errorf("loki URL is required")
 	}
@@ -51,7 +51,7 @@ func FetchLines(ctx context.Context, cfg Config) ([]string, error) {
 		end = time.Now().UTC().Format(time.RFC3339)
 	}
 
-	var entries []entry
+	var entries []Entry
 
 	// Paginate using 'start' cursor until no more results.
 	cursor := start
@@ -100,7 +100,7 @@ func FetchLines(ctx context.Context, cfg Config) ([]string, error) {
 				if err != nil {
 					continue
 				}
-				entries = append(entries, entry{nsTimestamp: ns, line: val[1]})
+				entries = append(entries, Entry{Timestamp: ns, Line: val[1]})
 				batchSize++
 				if ns > lastNS {
 					lastNS = ns
@@ -119,12 +119,7 @@ func FetchLines(ctx context.Context, cfg Config) ([]string, error) {
 
 	// Sort oldest-first by wall-clock nanosecond timestamp.
 	sort.Slice(entries, func(i, j int) bool {
-		return entries[i].nsTimestamp < entries[j].nsTimestamp
+		return entries[i].Timestamp < entries[j].Timestamp
 	})
-
-	lines := make([]string, len(entries))
-	for i, e := range entries {
-		lines[i] = e.line
-	}
-	return lines, nil
+	return entries, nil
 }

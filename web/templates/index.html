@@ -9,14 +9,14 @@
     {{if .Matches}}
     <table class="data-table">
       <thead>
-        <tr><th>Map</th><th>Type</th><th>Clock</th></tr>
+        <tr><th>Map</th><th>Type</th><th>Time</th></tr>
       </thead>
       <tbody>
         {{range .Matches}}
         <tr>
           <td><a href="/matches/{{.ID}}">{{.MapName}}</a></td>
           <td>{{.GameType}}</td>
-          <td>{{fmtClock .StartedAt}}</td>
+          <td>{{fmtDateTime .StartedAt}}</td>
         </tr>
         {{end}}
       </tbody>

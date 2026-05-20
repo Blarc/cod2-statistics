@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
+	"time"
 
 	_ "modernc.org/sqlite"
 )
@@ -31,7 +33,69 @@ func New(path string) (*Store, error) {
 		db.Close()
 		return nil, fmt.Errorf("migrate: %w", err)
 	}
+	if err := migrateWallTimeColumns(db); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("migrate wall-time columns: %w", err)
+	}
 	return &Store{db: db}, nil
+}
+
+func migrateWallTimeColumns(db *sql.DB) error {
+	stmts := []string{
+		`ALTER TABLE matches ADD COLUMN started_at_time_ns INTEGER`,
+		`ALTER TABLE matches ADD COLUMN ended_at_time_ns INTEGER`,
+		`ALTER TABLE kill_events ADD COLUMN time_ns INTEGER`,
+		`ALTER TABLE damage_events ADD COLUMN time_ns INTEGER`,
+		`ALTER TABLE weapon_events ADD COLUMN time_ns INTEGER`,
+		`ALTER TABLE match_player_stats ADD COLUMN first_seen_time_ns INTEGER`,
+		`ALTER TABLE match_player_stats ADD COLUMN last_seen_time_ns INTEGER`,
+		`ALTER TABLE matches DROP COLUMN started_at`,
+		`ALTER TABLE matches DROP COLUMN ended_at`,
+		`ALTER TABLE kill_events DROP COLUMN clock`,
+		`ALTER TABLE damage_events DROP COLUMN clock`,
+		`ALTER TABLE weapon_events DROP COLUMN clock`,
+		`ALTER TABLE match_player_stats DROP COLUMN first_seen`,
+		`ALTER TABLE match_player_stats DROP COLUMN last_seen`,
+		`CREATE INDEX IF NOT EXISTS idx_matches_started_time_ns ON matches(started_at_time_ns DESC)`,
+		`CREATE INDEX IF NOT EXISTS idx_kill_events_time_ns ON kill_events(match_id, time_ns)`,
+		`CREATE INDEX IF NOT EXISTS idx_damage_events_time_ns ON damage_events(match_id, time_ns)`,
+	}
+	for _, stmt := range stmts {
+		if _, err := db.Exec(stmt); err != nil {
+			errLower := strings.ToLower(err.Error())
+			if strings.Contains(errLower, "duplicate column name") || strings.Contains(errLower, "no such column") {
+				continue
+			}
+			return err
+		}
+	}
+
+	// Drop old open-match state keys that used in-game clock seconds.
+	if _, err := db.Exec(`DELETE FROM poll_state WHERE key IN ('open_started_at','open_last_clock')`); err != nil {
+		return err
+	}
+	return nil
+}
+
+func toUnixNS(t time.Time) int64 {
+	if t.IsZero() {
+		return 0
+	}
+	return t.UTC().UnixNano()
+}
+
+func toUnixNSValue(t time.Time) any {
+	if t.IsZero() {
+		return nil
+	}
+	return t.UTC().UnixNano()
+}
+
+func fromUnixNS(ns int64) time.Time {
+	if ns <= 0 {
+		return time.Time{}
+	}
+	return time.Unix(0, ns).UTC()
 }
 
 // Close closes the underlying database.
@@ -55,11 +119,19 @@ func (s *Store) SaveMatch(m *model.Match) error {
 	defer tx.Rollback() //nolint:errcheck
 
 	// --- match row ---
-	_, err = tx.Exec(`INSERT INTO matches (id, map_name, game_type, started_at, ended_at)
+	_, err = tx.Exec(`INSERT INTO matches (id, map_name, game_type, started_at_time_ns, ended_at_time_ns)
 		VALUES (?, ?, ?, ?, ?)
 		ON CONFLICT(id) DO UPDATE SET
-			started_at = MIN(COALESCE(matches.started_at, excluded.started_at), excluded.started_at),
-			ended_at   = MAX(COALESCE(matches.ended_at, excluded.ended_at), excluded.ended_at),
+			started_at_time_ns = CASE
+				WHEN excluded.started_at_time_ns IS NULL THEN matches.started_at_time_ns
+				WHEN matches.started_at_time_ns IS NULL THEN excluded.started_at_time_ns
+				ELSE MIN(matches.started_at_time_ns, excluded.started_at_time_ns)
+			END,
+			ended_at_time_ns   = CASE
+				WHEN excluded.ended_at_time_ns IS NULL THEN matches.ended_at_time_ns
+				WHEN matches.ended_at_time_ns IS NULL THEN excluded.ended_at_time_ns
+				ELSE MAX(matches.ended_at_time_ns, excluded.ended_at_time_ns)
+			END,
 			map_name   = CASE
 				WHEN matches.map_name = '' AND excluded.map_name != '' THEN excluded.map_name
 				ELSE matches.map_name
@@ -68,7 +140,7 @@ func (s *Store) SaveMatch(m *model.Match) error {
 				WHEN matches.game_type = '' AND excluded.game_type != '' THEN excluded.game_type
 				ELSE matches.game_type
 			END`,
-		m.ID, m.MapName, m.GameType, m.StartedAt, m.EndedAt)
+		m.ID, m.MapName, m.GameType, toUnixNSValue(m.StartedAt), toUnixNSValue(m.EndedAt))
 	if err != nil {
 		return fmt.Errorf("insert match: %w", err)
 	}
@@ -92,10 +164,10 @@ func (s *Store) SaveMatch(m *model.Match) error {
 	for _, ev := range m.KillEvents {
 		if _, err := tx.Exec(`
 			INSERT OR IGNORE INTO kill_events
-				(match_id, clock, victim_name, victim_team, killer_name, killer_team,
+				(match_id, time_ns, victim_name, victim_team, killer_name, killer_team,
 				 weapon, damage, mod, hit_loc, idempotency_key)
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			m.ID, ev.ClockSec,
+			m.ID, toUnixNSValue(ev.Time),
 			ev.VictimNameNorm, ev.VictimTeam,
 			ev.KillerNameNorm, ev.KillerTeam,
 			ev.Weapon, ev.Damage, ev.Mod, ev.HitLoc,
@@ -108,10 +180,10 @@ func (s *Store) SaveMatch(m *model.Match) error {
 	for _, ev := range m.DamageEvents {
 		if _, err := tx.Exec(`
 			INSERT OR IGNORE INTO damage_events
-				(match_id, clock, victim_name, victim_team, attacker_name, attacker_team,
+				(match_id, time_ns, victim_name, victim_team, attacker_name, attacker_team,
 				 weapon, damage, mod, hit_loc, idempotency_key)
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			m.ID, ev.ClockSec,
+			m.ID, toUnixNSValue(ev.Time),
 			ev.VictimNameNorm, ev.VictimTeam,
 			ev.KillerNameNorm, ev.KillerTeam,
 			ev.Weapon, ev.Damage, ev.Mod, ev.HitLoc,
@@ -124,9 +196,9 @@ func (s *Store) SaveMatch(m *model.Match) error {
 	for _, ev := range m.WeaponEvents {
 		if _, err := tx.Exec(`
 			INSERT OR IGNORE INTO weapon_events
-				(match_id, clock, player_name, weapon, idempotency_key)
+				(match_id, time_ns, player_name, weapon, idempotency_key)
 			VALUES (?, ?, ?, ?, ?)`,
-			m.ID, ev.ClockSec, ev.PlayerNameNorm, ev.Weapon, ev.IdempotencyKey); err != nil {
+			m.ID, toUnixNSValue(ev.Time), ev.PlayerNameNorm, ev.Weapon, ev.IdempotencyKey); err != nil {
 			return fmt.Errorf("insert weapon event: %w", err)
 		}
 	}
@@ -145,17 +217,20 @@ type playerAggregate struct {
 	DamageTaken int
 	Headshots   int
 	WeaponKills map[string]int
-	FirstSeen   int
-	LastSeen    int
+	FirstSeen   time.Time
+	LastSeen    time.Time
 	EventCount  int
 }
 
-func (ps *playerAggregate) markSeen(clock int) {
-	if ps.FirstSeen == 0 || clock < ps.FirstSeen {
-		ps.FirstSeen = clock
+func (ps *playerAggregate) markSeen(eventTime time.Time) {
+	if eventTime.IsZero() {
+		return
 	}
-	if clock > ps.LastSeen {
-		ps.LastSeen = clock
+	if ps.FirstSeen.IsZero() || eventTime.Before(ps.FirstSeen) {
+		ps.FirstSeen = eventTime
+	}
+	if ps.LastSeen.IsZero() || eventTime.After(ps.LastSeen) {
+		ps.LastSeen = eventTime
 	}
 }
 
@@ -172,7 +247,7 @@ func (s *Store) rebuildMatchPlayerStats(tx *sql.Tx, matchID string) error {
 	stats := make(map[string]*playerAggregate)
 
 	killRows, err := tx.Query(`
-		SELECT COALESCE(clock,0), COALESCE(victim_name,''), COALESCE(killer_name,''),
+		SELECT COALESCE(time_ns,0), COALESCE(victim_name,''), COALESCE(killer_name,''),
 		       COALESCE(weapon,''), COALESCE(mod,''), COALESCE(hit_loc,'')
 		FROM kill_events
 		WHERE match_id = ?`, matchID)
@@ -180,23 +255,24 @@ func (s *Store) rebuildMatchPlayerStats(tx *sql.Tx, matchID string) error {
 		return fmt.Errorf("query kill events: %w", err)
 	}
 	for killRows.Next() {
-		var clock int
+		var timeNS int64
 		var victim, killer, weapon, mod, hitLoc string
-		if err := killRows.Scan(&clock, &victim, &killer, &weapon, &mod, &hitLoc); err != nil {
+		if err := killRows.Scan(&timeNS, &victim, &killer, &weapon, &mod, &hitLoc); err != nil {
 			killRows.Close()
 			return fmt.Errorf("scan kill event: %w", err)
 		}
+		eventTime := fromUnixNS(timeNS)
 		if victim != "" {
 			v := ensureAggPlayer(stats, victim)
 			v.Deaths++
 			v.EventCount++
-			v.markSeen(clock)
+			v.markSeen(eventTime)
 		}
 		if killer != "" {
 			k := ensureAggPlayer(stats, killer)
 			k.Kills++
 			k.EventCount++
-			k.markSeen(clock)
+			k.markSeen(eventTime)
 			k.WeaponKills[weapon]++
 			if mod == "MOD_HEAD_SHOT" || hitLoc == "head" {
 				k.Headshots++
@@ -208,7 +284,7 @@ func (s *Store) rebuildMatchPlayerStats(tx *sql.Tx, matchID string) error {
 	}
 
 	damageRows, err := tx.Query(`
-		SELECT COALESCE(clock,0), COALESCE(victim_name,''), COALESCE(attacker_name,''),
+		SELECT COALESCE(time_ns,0), COALESCE(victim_name,''), COALESCE(attacker_name,''),
 		       COALESCE(damage,0)
 		FROM damage_events
 		WHERE match_id = ?`, matchID)
@@ -216,23 +292,25 @@ func (s *Store) rebuildMatchPlayerStats(tx *sql.Tx, matchID string) error {
 		return fmt.Errorf("query damage events: %w", err)
 	}
 	for damageRows.Next() {
-		var clock, damage int
+		var timeNS int64
+		var damage int
 		var victim, attacker string
-		if err := damageRows.Scan(&clock, &victim, &attacker, &damage); err != nil {
+		if err := damageRows.Scan(&timeNS, &victim, &attacker, &damage); err != nil {
 			damageRows.Close()
 			return fmt.Errorf("scan damage event: %w", err)
 		}
+		eventTime := fromUnixNS(timeNS)
 		if victim != "" {
 			v := ensureAggPlayer(stats, victim)
 			v.DamageTaken += damage
 			v.EventCount++
-			v.markSeen(clock)
+			v.markSeen(eventTime)
 		}
 		if attacker != "" {
 			a := ensureAggPlayer(stats, attacker)
 			a.DamageDealt += damage
 			a.EventCount++
-			a.markSeen(clock)
+			a.markSeen(eventTime)
 		}
 	}
 	if err := damageRows.Close(); err != nil {
@@ -240,23 +318,24 @@ func (s *Store) rebuildMatchPlayerStats(tx *sql.Tx, matchID string) error {
 	}
 
 	weaponRows, err := tx.Query(`
-		SELECT COALESCE(clock,0), COALESCE(player_name,'')
+		SELECT COALESCE(time_ns,0), COALESCE(player_name,'')
 		FROM weapon_events
 		WHERE match_id = ?`, matchID)
 	if err != nil {
 		return fmt.Errorf("query weapon events: %w", err)
 	}
 	for weaponRows.Next() {
-		var clock int
+		var timeNS int64
 		var player string
-		if err := weaponRows.Scan(&clock, &player); err != nil {
+		if err := weaponRows.Scan(&timeNS, &player); err != nil {
 			weaponRows.Close()
 			return fmt.Errorf("scan weapon event: %w", err)
 		}
+		eventTime := fromUnixNS(timeNS)
 		if player != "" {
 			p := ensureAggPlayer(stats, player)
 			p.EventCount++
-			p.markSeen(clock)
+			p.markSeen(eventTime)
 		}
 	}
 	if err := weaponRows.Close(); err != nil {
@@ -285,12 +364,12 @@ func (s *Store) rebuildMatchPlayerStats(tx *sql.Tx, matchID string) error {
 		if _, err := tx.Exec(`
 			INSERT INTO match_player_stats
 				(match_id, player_id, kills, deaths, damage_dealt, damage_taken,
-				 headshots, weapon_kills, first_seen, last_seen, event_count)
+				 headshots, weapon_kills, first_seen_time_ns, last_seen_time_ns, event_count)
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			matchID, playerID,
 			ps.Kills, ps.Deaths, ps.DamageDealt, ps.DamageTaken,
 			ps.Headshots, string(weaponJSON),
-			ps.FirstSeen, ps.LastSeen, ps.EventCount,
+			toUnixNSValue(ps.FirstSeen), toUnixNSValue(ps.LastSeen), ps.EventCount,
 		); err != nil {
 			return fmt.Errorf("insert rebuilt stats for %q: %w", name, err)
 		}
@@ -310,8 +389,7 @@ func (s *Store) SetOpenMatch(open *OpenMatch) error {
 		"open_match_id",
 		"open_map_name",
 		"open_game_type",
-		"open_started_at",
-		"open_last_clock",
+		"open_started_at_ns",
 	}
 
 	if open == nil || open.MatchID == "" {
@@ -324,11 +402,10 @@ func (s *Store) SetOpenMatch(open *OpenMatch) error {
 	}
 
 	values := map[string]string{
-		"open_match_id":   open.MatchID,
-		"open_map_name":   open.MapName,
-		"open_game_type":  open.GameType,
-		"open_started_at": strconv.Itoa(open.StartedAt),
-		"open_last_clock": strconv.Itoa(open.LastClock),
+		"open_match_id":      open.MatchID,
+		"open_map_name":      open.MapName,
+		"open_game_type":     open.GameType,
+		"open_started_at_ns": strconv.FormatInt(toUnixNS(open.StartedAt), 10),
 	}
 	for _, k := range keys {
 		if _, err := tx.Exec(

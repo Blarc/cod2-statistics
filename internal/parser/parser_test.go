@@ -82,9 +82,6 @@ func TestParseLineKill(t *testing.T) {
 	if rl.EventType != "K" {
 		t.Errorf("EventType = %q, want K", rl.EventType)
 	}
-	if rl.ClockSec != 12912*60+13 {
-		t.Errorf("ClockSec = %d, want %d", rl.ClockSec, 12912*60+13)
-	}
 	if len(rl.Fields) != 13 {
 		t.Errorf("Fields len = %d, want 13", len(rl.Fields))
 	}
@@ -182,7 +179,6 @@ func TestParseKDWorldDamage(t *testing.T) {
 func TestParseKDTooFewFields(t *testing.T) {
 	// Build a RawLine with too few fields directly to test ParseKD error path.
 	rl := &model.RawLine{
-		ClockSec:  100,
 		EventType: "K",
 		Fields:    []string{"K", "0", "1"},
 		Raw:       "short",

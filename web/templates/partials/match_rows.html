@@ -14,8 +14,8 @@
     <tr>
       <td><a href="/matches/{{.ID}}">{{.MapName}}</a></td>
       <td>{{.GameType}}</td>
-      <td>{{fmtClock .StartedAt}}</td>
-      <td>{{fmtClock .EndedAt}}</td>
+      <td>{{fmtDateTime .StartedAt}}</td>
+      <td>{{fmtDateTime .EndedAt}}</td>
       <td><a href="/matches/{{.ID}}">view &raquo;</a></td>
     </tr>
     {{else}}

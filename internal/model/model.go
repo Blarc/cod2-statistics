@@ -1,8 +1,10 @@
 package model
 
-// RawLine is a tokenised log line (clock + event type + raw fields).
+import "time"
+
+// RawLine is a tokenised log line with wall-clock time, event type and raw fields.
 type RawLine struct {
-	ClockSec  int
+	Time      time.Time
 	EventType string
 	Fields    []string
 	Raw       string // full trimmed original text
@@ -10,7 +12,7 @@ type RawLine struct {
 
 // KDEvent covers both K (kill) and D (damage) events — identical field layout.
 type KDEvent struct {
-	ClockSec       int
+	Time           time.Time
 	IsKill         bool
 	VictimName     string // raw
 	VictimNameNorm string // color-stripped
@@ -27,7 +29,7 @@ type KDEvent struct {
 
 // WeaponEvent is a Weapon pickup/switch line.
 type WeaponEvent struct {
-	ClockSec       int
+	Time           time.Time
 	PlayerName     string
 	PlayerNameNorm string
 	Weapon         string
@@ -36,7 +38,8 @@ type WeaponEvent struct {
 
 // InitGameEvent holds parsed key-value metadata from an InitGame line.
 type InitGameEvent struct {
-	ClockSec int
+	Time     time.Time
+	Raw      string
 	MapName  string
 	GameType string
 	Meta     map[string]string
@@ -52,8 +55,8 @@ type PlayerStats struct {
 	DamageTaken    int
 	Headshots      int
 	WeaponKills    map[string]int
-	FirstSeen      int // clock seconds
-	LastSeen       int
+	FirstSeen      time.Time
+	LastSeen       time.Time
 	EventCount     int
 }
 
@@ -62,8 +65,8 @@ type Match struct {
 	ID           string
 	MapName      string
 	GameType     string
-	StartedAt    int // clock seconds
-	EndedAt      int
+	StartedAt    time.Time
+	EndedAt      time.Time
 	KillEvents   []*KDEvent
 	DamageEvents []*KDEvent
 	WeaponEvents []*WeaponEvent

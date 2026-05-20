@@ -5,17 +5,22 @@ import (
 	"cod2-statistics/internal/parser"
 	"fmt"
 	"sort"
-	"strconv"
+	"time"
 )
 
-const clockResetThreshold = 60 // seconds drop that implies a server restart
+const wallTimeResetThreshold = 60 * time.Second // backwards jump that implies a new session
 
-// SortOldestFirst sorts RawLines by ClockSec ascending.
+// SortOldestFirst sorts RawLines by wall-clock timestamp ascending.
 // Both file sources and Loki deliver lines newest-first, so this must always
 // be called before ProcessLines.
 func SortOldestFirst(lines []*model.RawLine) {
 	sort.SliceStable(lines, func(i, j int) bool {
-		return lines[i].ClockSec < lines[j].ClockSec
+		ti := lines[i].Time
+		tj := lines[j].Time
+		if ti.IsZero() || tj.IsZero() {
+			return lines[i].Raw < lines[j].Raw
+		}
+		return ti.Before(tj)
 	})
 }
 
@@ -25,14 +30,13 @@ type Continuation struct {
 	MatchID   string
 	MapName   string
 	GameType  string
-	StartedAt int
-	LastClock int
+	StartedAt time.Time
 }
 
 // ProcessLines groups sorted lines into matches using boundary rules (in priority order):
 //  1. InitGame  → finalise current match, start a new one
 //  2. ShutdownGame → finalise current match
-//  3. Clock reset (current < prev - threshold) → implicit match boundary
+//  3. Wall-time rewind (current < prev - threshold) → implicit match boundary
 //
 // Lines that appear before the first InitGame are assigned to an implicit match
 // with no map/gametype metadata.
@@ -54,22 +58,26 @@ func ProcessLinesWithState(lines []*model.RawLine, cont *Continuation) ([]*model
 	var matches []*model.Match
 	var current *matchBuilder
 
-	prevClock := -1
+	var prevTime time.Time
+	var lastSeenTime time.Time
 	if cont != nil && cont.MatchID != "" {
 		current = newContinuationBuilder(cont)
 	}
 
 	for _, rl := range lines {
-		// Clock-reset boundary check (evaluated before event dispatch).
-		if prevClock >= 0 && rl.ClockSec < prevClock-clockResetThreshold {
-			matches = appendFinalized(matches, current, rl.ClockSec)
+		// Wall-time rewind boundary check (evaluated before event dispatch).
+		if !prevTime.IsZero() && !rl.Time.IsZero() && rl.Time.Before(prevTime.Add(-wallTimeResetThreshold)) {
+			matches = appendFinalized(matches, current, rl.Time)
 			current = nil
 		}
-		prevClock = rl.ClockSec
+		if !rl.Time.IsZero() {
+			prevTime = rl.Time
+			lastSeenTime = rl.Time
+		}
 
 		switch rl.EventType {
 		case "InitGame":
-			matches = appendFinalized(matches, current, rl.ClockSec)
+			matches = appendFinalized(matches, current, rl.Time)
 			ig, err := parser.ParseInitGame(rl)
 			if err != nil {
 				continue
@@ -78,13 +86,13 @@ func ProcessLinesWithState(lines []*model.RawLine, cont *Continuation) ([]*model
 
 		case "ShutdownGame":
 			if current != nil {
-				matches = appendFinalized(matches, current, rl.ClockSec)
+				matches = appendFinalized(matches, current, rl.Time)
 				current = nil
 			}
 
 		case "K", "D":
 			if current == nil {
-				current = newOrphanBuilder(rl.ClockSec)
+				current = newOrphanBuilder(rl.Raw, rl.Time)
 			}
 			matchID := current.match.ID
 			ev, err := parser.ParseKD(rl, matchID)
@@ -95,7 +103,7 @@ func ProcessLinesWithState(lines []*model.RawLine, cont *Continuation) ([]*model
 
 		case "Weapon":
 			if current == nil {
-				current = newOrphanBuilder(rl.ClockSec)
+				current = newOrphanBuilder(rl.Raw, rl.Time)
 			}
 			matchID := current.match.ID
 			ev, err := parser.ParseWeapon(rl, matchID)
@@ -106,9 +114,9 @@ func ProcessLinesWithState(lines []*model.RawLine, cont *Continuation) ([]*model
 		}
 	}
 
-	matches = appendFinalized(matches, current, prevClock)
+	matches = appendFinalized(matches, current, lastSeenTime)
 
-	next := buildContinuation(current, prevClock, cont)
+	next := buildContinuation(current)
 	return matches, next, nil
 }
 
@@ -120,13 +128,13 @@ type matchBuilder struct {
 }
 
 func newMatchBuilder(ig *model.InitGameEvent) *matchBuilder {
-	id := parser.IdempotencyKey(ig.MapName, ig.GameType, strconv.Itoa(ig.ClockSec))
+	id := parser.IdempotencyKey(ig.MapName, ig.GameType, ig.Raw)
 	return &matchBuilder{
 		match: &model.Match{
 			ID:        id,
 			MapName:   ig.MapName,
 			GameType:  ig.GameType,
-			StartedAt: ig.ClockSec,
+			StartedAt: ig.Time,
 			Players:   make(map[string]*model.PlayerStats),
 		},
 		seen:   make(map[string]struct{}),
@@ -134,14 +142,14 @@ func newMatchBuilder(ig *model.InitGameEvent) *matchBuilder {
 	}
 }
 
-func newOrphanBuilder(clockSec int) *matchBuilder {
-	id := parser.IdempotencyKey("orphan", strconv.Itoa(clockSec))
+func newOrphanBuilder(seed string, startedAt time.Time) *matchBuilder {
+	id := parser.IdempotencyKey("orphan", seed)
 	return &matchBuilder{
 		match: &model.Match{
 			ID:        id,
 			MapName:   "",
 			GameType:  "",
-			StartedAt: clockSec,
+			StartedAt: startedAt,
 			Players:   make(map[string]*model.PlayerStats),
 		},
 		seen:   make(map[string]struct{}),
@@ -151,9 +159,6 @@ func newOrphanBuilder(clockSec int) *matchBuilder {
 
 func newContinuationBuilder(cont *Continuation) *matchBuilder {
 	start := cont.StartedAt
-	if start == 0 {
-		start = cont.LastClock
-	}
 	return &matchBuilder{
 		match: &model.Match{
 			ID:        cont.MatchID,
@@ -167,14 +172,14 @@ func newContinuationBuilder(cont *Continuation) *matchBuilder {
 	}
 }
 
-func appendFinalized(matches []*model.Match, current *matchBuilder, endClock int) []*model.Match {
+func appendFinalized(matches []*model.Match, current *matchBuilder, endTime time.Time) []*model.Match {
 	if current == nil {
 		return matches
 	}
-	if endClock < 0 {
-		endClock = current.match.StartedAt
+	if endTime.IsZero() {
+		endTime = current.match.StartedAt
 	}
-	m := current.finalise(endClock)
+	m := current.finalise(endTime)
 	// Ignore empty placeholders (e.g., continuation seed with no new events).
 	if current.seeded && len(m.Players) == 0 && len(m.KillEvents) == 0 && len(m.DamageEvents) == 0 && len(m.WeaponEvents) == 0 {
 		return matches
@@ -182,29 +187,20 @@ func appendFinalized(matches []*model.Match, current *matchBuilder, endClock int
 	return append(matches, m)
 }
 
-func buildContinuation(current *matchBuilder, prevClock int, prior *Continuation) *Continuation {
+func buildContinuation(current *matchBuilder) *Continuation {
 	if current == nil {
 		return nil
-	}
-	lastClock := prevClock
-	if lastClock < 0 {
-		if prior != nil {
-			lastClock = prior.LastClock
-		} else {
-			lastClock = current.match.StartedAt
-		}
 	}
 	return &Continuation{
 		MatchID:   current.match.ID,
 		MapName:   current.match.MapName,
 		GameType:  current.match.GameType,
 		StartedAt: current.match.StartedAt,
-		LastClock: lastClock,
 	}
 }
 
-func (mb *matchBuilder) finalise(endClock int) *model.Match {
-	mb.match.EndedAt = endClock
+func (mb *matchBuilder) finalise(endTime time.Time) *model.Match {
+	mb.match.EndedAt = endTime
 	return mb.match
 }
 
@@ -226,7 +222,7 @@ func (mb *matchBuilder) addKD(ev *model.KDEvent) {
 	if ev.VictimNameNorm != "" {
 		v := mb.ensurePlayer(ev.VictimNameNorm, ev.VictimName)
 		v.EventCount++
-		updateSeen(v, ev.ClockSec)
+		updateSeen(v, ev.Time)
 		if ev.IsKill {
 			v.Deaths++
 		}
@@ -239,7 +235,7 @@ func (mb *matchBuilder) addKD(ev *model.KDEvent) {
 	if ev.KillerNameNorm != "" {
 		k := mb.ensurePlayer(ev.KillerNameNorm, ev.KillerName)
 		k.EventCount++
-		updateSeen(k, ev.ClockSec)
+		updateSeen(k, ev.Time)
 		if ev.IsKill {
 			k.Kills++
 			if k.WeaponKills == nil {
@@ -266,7 +262,7 @@ func (mb *matchBuilder) addWeapon(ev *model.WeaponEvent) {
 	if ev.PlayerNameNorm != "" {
 		p := mb.ensurePlayer(ev.PlayerNameNorm, ev.PlayerName)
 		p.EventCount++
-		updateSeen(p, ev.ClockSec)
+		updateSeen(p, ev.Time)
 	}
 }
 
@@ -288,12 +284,15 @@ func (mb *matchBuilder) ensurePlayer(norm, raw string) *model.PlayerStats {
 	return p
 }
 
-func updateSeen(p *model.PlayerStats, clock int) {
-	if p.FirstSeen == 0 || clock < p.FirstSeen {
-		p.FirstSeen = clock
+func updateSeen(p *model.PlayerStats, eventTime time.Time) {
+	if eventTime.IsZero() {
+		return
 	}
-	if clock > p.LastSeen {
-		p.LastSeen = clock
+	if p.FirstSeen.IsZero() || eventTime.Before(p.FirstSeen) {
+		p.FirstSeen = eventTime
+	}
+	if p.LastSeen.IsZero() || eventTime.After(p.LastSeen) {
+		p.LastSeen = eventTime
 	}
 }
 

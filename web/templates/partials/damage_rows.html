@@ -16,7 +16,7 @@
   <tbody>
     {{range .Damage}}
     <tr>
-      <td>{{fmtClock .Clock}}</td>
+      <td>{{fmtEventTime .Time}}</td>
       <td>{{if .AttackerName}}{{.AttackerName}}{{else}}<em>world</em>{{end}}</td>
       <td class="team-{{.AttackerTeam}}">{{.AttackerTeam}}</td>
       <td>{{.VictimName}}</td>
