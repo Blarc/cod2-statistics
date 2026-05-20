@@ -108,6 +108,23 @@ func (s *Store) ListMatches(mapName, gameType string, limit, offset int) ([]Matc
 	return out, total, rows.Err()
 }
 
+func (s *Store) GetLatestMatch() (*MatchSummary, error) {
+	var m MatchSummary
+	err := s.db.QueryRow(
+		`SELECT id, map_name, game_type, COALESCE(started_at,0), COALESCE(ended_at,0)
+		 FROM matches
+		 ORDER BY started_at DESC, ended_at DESC
+		 LIMIT 1`,
+	).Scan(&m.ID, &m.MapName, &m.GameType, &m.StartedAt, &m.EndedAt)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("get latest match: %w", err)
+	}
+	return &m, nil
+}
+
 func buildMatchWhere(mapName, gameType string) (string, []any) {
 	where := "WHERE 1=1"
 	var args []any

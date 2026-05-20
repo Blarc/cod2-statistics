@@ -82,7 +82,23 @@ func (p *Poller) pollOnce(ctx context.Context) error {
 		}
 	}
 
-	matches, err := matcher.ProcessLines(rls)
+	var cont *matcher.Continuation
+	latest, err := p.store.GetLatestMatch()
+	if err != nil {
+		_ = p.store.SetLastPollError(err.Error())
+		return fmt.Errorf("get latest match: %w", err)
+	}
+	if latest != nil {
+		cont = &matcher.Continuation{
+			MatchID:   latest.ID,
+			MapName:   latest.MapName,
+			GameType:  latest.GameType,
+			StartedAt: latest.StartedAt,
+			LastClock: latest.EndedAt,
+		}
+	}
+
+	matches, err := matcher.ProcessLinesWithContinuation(rls, cont)
 	if err != nil {
 		_ = p.store.SetLastPollError(err.Error())
 		return fmt.Errorf("process lines: %w", err)

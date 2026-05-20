@@ -54,13 +54,23 @@ func (s *Store) SaveMatch(m *model.Match) error {
 	defer tx.Rollback() //nolint:errcheck
 
 	// --- match row ---
-	res, err := tx.Exec(`INSERT OR IGNORE INTO matches (id, map_name, game_type, started_at, ended_at)
-		VALUES (?, ?, ?, ?, ?)`,
+	_, err = tx.Exec(`INSERT INTO matches (id, map_name, game_type, started_at, ended_at)
+		VALUES (?, ?, ?, ?, ?)
+		ON CONFLICT(id) DO UPDATE SET
+			started_at = MIN(COALESCE(matches.started_at, excluded.started_at), excluded.started_at),
+			ended_at   = MAX(COALESCE(matches.ended_at, excluded.ended_at), excluded.ended_at),
+			map_name   = CASE
+				WHEN matches.map_name = '' AND excluded.map_name != '' THEN excluded.map_name
+				ELSE matches.map_name
+			END,
+			game_type  = CASE
+				WHEN matches.game_type = '' AND excluded.game_type != '' THEN excluded.game_type
+				ELSE matches.game_type
+			END`,
 		m.ID, m.MapName, m.GameType, m.StartedAt, m.EndedAt)
 	if err != nil {
 		return fmt.Errorf("insert match: %w", err)
 	}
-	_ = res
 
 	// --- players + stats ---
 	for _, ps := range m.Players {

@@ -85,6 +85,68 @@ func TestClockReset(t *testing.T) {
 	}
 }
 
+func TestContinuationKeepsSameMatchAcrossPolls(t *testing.T) {
+	firstPoll := `12898:14 InitGame: \g_gametype\dm\mapname\mp_toujane\protocol\118
+12898:30 K;0;0;;alpha;0;1;;beta;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower`
+
+	rls := parseRawLines(t, firstPoll)
+	matcher.SortOldestFirst(rls)
+	initial, err := matcher.ProcessLines(rls)
+	if err != nil {
+		t.Fatalf("ProcessLines first poll: %v", err)
+	}
+	if len(initial) != 1 {
+		t.Fatalf("first poll matches = %d, want 1", len(initial))
+	}
+
+	cont := &matcher.Continuation{
+		MatchID:   initial[0].ID,
+		MapName:   initial[0].MapName,
+		GameType:  initial[0].GameType,
+		StartedAt: initial[0].StartedAt,
+		LastClock: initial[0].EndedAt,
+	}
+
+	secondPoll := `12898:40 K;0;0;;gamma;0;1;;delta;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower`
+	rls2 := parseRawLines(t, secondPoll)
+	got, err := matcher.ProcessLinesWithContinuation(rls2, cont)
+	if err != nil {
+		t.Fatalf("ProcessLinesWithContinuation second poll: %v", err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("second poll matches = %d, want 1", len(got))
+	}
+	if got[0].ID != cont.MatchID {
+		t.Errorf("continued match ID = %q, want %q", got[0].ID, cont.MatchID)
+	}
+	if got[0].MapName != "mp_toujane" {
+		t.Errorf("continued map = %q, want mp_toujane", got[0].MapName)
+	}
+}
+
+func TestContinuationClockDropStartsNewMatch(t *testing.T) {
+	cont := &matcher.Continuation{
+		MatchID:   "existing-match",
+		MapName:   "mp_toujane",
+		GameType:  "dm",
+		StartedAt: 12898 * 60,
+		LastClock: 12900 * 60,
+	}
+
+	secondPoll := `100:00 K;0;0;;gamma;0;1;;delta;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower`
+	rls := parseRawLines(t, secondPoll)
+	got, err := matcher.ProcessLinesWithContinuation(rls, cont)
+	if err != nil {
+		t.Fatalf("ProcessLinesWithContinuation: %v", err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("matches = %d, want 1", len(got))
+	}
+	if got[0].ID == cont.MatchID {
+		t.Fatalf("clock reset should start a new match; got same ID %q", got[0].ID)
+	}
+}
+
 func TestMalformedLineSkipped(t *testing.T) {
 	input := `12898:14 InitGame: \g_gametype\dm\mapname\mp_toujane\protocol\118
 12898:30 K;0;0;;onlyFiveFields`

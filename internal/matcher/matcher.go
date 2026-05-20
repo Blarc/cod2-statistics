@@ -19,6 +19,16 @@ func SortOldestFirst(lines []*model.RawLine) {
 	})
 }
 
+// Continuation seeds ProcessLinesWithContinuation with the latest known
+// in-progress match from a previous polling batch.
+type Continuation struct {
+	MatchID   string
+	MapName   string
+	GameType  string
+	StartedAt int
+	LastClock int
+}
+
 // ProcessLines groups sorted lines into matches using boundary rules (in priority order):
 //  1. InitGame  → finalise current match, start a new one
 //  2. ShutdownGame → finalise current match
@@ -27,26 +37,32 @@ func SortOldestFirst(lines []*model.RawLine) {
 // Lines that appear before the first InitGame are assigned to an implicit match
 // with no map/gametype metadata.
 func ProcessLines(lines []*model.RawLine) ([]*model.Match, error) {
+	return ProcessLinesWithContinuation(lines, nil)
+}
+
+// ProcessLinesWithContinuation behaves like ProcessLines, but can continue the
+// previous open match across poll boundaries.
+func ProcessLinesWithContinuation(lines []*model.RawLine, cont *Continuation) ([]*model.Match, error) {
 	var matches []*model.Match
 	var current *matchBuilder
 
 	prevClock := -1
+	if cont != nil && cont.MatchID != "" {
+		current = newContinuationBuilder(cont)
+		prevClock = cont.LastClock
+	}
 
 	for _, rl := range lines {
 		// Clock-reset boundary check (evaluated before event dispatch).
 		if prevClock >= 0 && rl.ClockSec < prevClock-clockResetThreshold {
-			if current != nil {
-				matches = append(matches, current.finalise(rl.ClockSec))
-			}
+			matches = appendFinalized(matches, current, rl.ClockSec)
 			current = nil
 		}
 		prevClock = rl.ClockSec
 
 		switch rl.EventType {
 		case "InitGame":
-			if current != nil {
-				matches = append(matches, current.finalise(rl.ClockSec))
-			}
+			matches = appendFinalized(matches, current, rl.ClockSec)
 			ig, err := parser.ParseInitGame(rl)
 			if err != nil {
 				continue
@@ -55,7 +71,7 @@ func ProcessLines(lines []*model.RawLine) ([]*model.Match, error) {
 
 		case "ShutdownGame":
 			if current != nil {
-				matches = append(matches, current.finalise(rl.ClockSec))
+				matches = appendFinalized(matches, current, rl.ClockSec)
 				current = nil
 			}
 
@@ -83,17 +99,16 @@ func ProcessLines(lines []*model.RawLine) ([]*model.Match, error) {
 		}
 	}
 
-	if current != nil {
-		matches = append(matches, current.finalise(prevClock))
-	}
+	matches = appendFinalized(matches, current, prevClock)
 
 	return matches, nil
 }
 
 // matchBuilder accumulates events for one in-progress match.
 type matchBuilder struct {
-	match *model.Match
-	seen  map[string]struct{} // idempotency keys
+	match  *model.Match
+	seen   map[string]struct{} // idempotency keys
+	seeded bool
 }
 
 func newMatchBuilder(ig *model.InitGameEvent) *matchBuilder {
@@ -106,7 +121,8 @@ func newMatchBuilder(ig *model.InitGameEvent) *matchBuilder {
 			StartedAt: ig.ClockSec,
 			Players:   make(map[string]*model.PlayerStats),
 		},
-		seen: make(map[string]struct{}),
+		seen:   make(map[string]struct{}),
+		seeded: false,
 	}
 }
 
@@ -120,8 +136,39 @@ func newOrphanBuilder(clockSec int) *matchBuilder {
 			StartedAt: clockSec,
 			Players:   make(map[string]*model.PlayerStats),
 		},
-		seen: make(map[string]struct{}),
+		seen:   make(map[string]struct{}),
+		seeded: false,
 	}
+}
+
+func newContinuationBuilder(cont *Continuation) *matchBuilder {
+	start := cont.StartedAt
+	if start == 0 {
+		start = cont.LastClock
+	}
+	return &matchBuilder{
+		match: &model.Match{
+			ID:        cont.MatchID,
+			MapName:   cont.MapName,
+			GameType:  cont.GameType,
+			StartedAt: start,
+			Players:   make(map[string]*model.PlayerStats),
+		},
+		seen:   make(map[string]struct{}),
+		seeded: true,
+	}
+}
+
+func appendFinalized(matches []*model.Match, current *matchBuilder, endClock int) []*model.Match {
+	if current == nil {
+		return matches
+	}
+	m := current.finalise(endClock)
+	// Ignore empty placeholders (e.g., continuation seed with no new events).
+	if current.seeded && len(m.Players) == 0 && len(m.KillEvents) == 0 && len(m.DamageEvents) == 0 && len(m.WeaponEvents) == 0 {
+		return matches
+	}
+	return append(matches, m)
 }
 
 func (mb *matchBuilder) finalise(endClock int) *model.Match {
