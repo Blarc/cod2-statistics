@@ -1,0 +1,27 @@
+{{define "header"}}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoD2 Stats</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="https://unpkg.com/htmx.org@2.0.3/dist/htmx.min.js"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12/dist/_hyperscript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<nav class="nav">
+  <a class="nav-brand" href="/">CoD2 Stats</a>
+  <div class="nav-links">
+    <a href="/matches">Matches</a>
+    <a href="/players">Players</a>
+  </div>
+</nav>
+<main class="main">
+{{end}}
+
+{{define "footer"}}
+</main>
+</body>
+</html>
+{{end}}

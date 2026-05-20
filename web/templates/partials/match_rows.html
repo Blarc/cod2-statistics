@@ -1,0 +1,45 @@
+{{define "partials/match_rows"}}
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Map</th>
+      <th>Type</th>
+      <th>Start</th>
+      <th>End</th>
+      <th>Players</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{range .Matches}}
+    <tr>
+      <td><a href="/matches/{{.ID}}">{{.MapName}}</a></td>
+      <td>{{.GameType}}</td>
+      <td>{{fmtClock .StartedAt}}</td>
+      <td>{{fmtClock .EndedAt}}</td>
+      <td><a href="/matches/{{.ID}}">view &raquo;</a></td>
+    </tr>
+    {{else}}
+    <tr><td colspan="5" class="empty">No matches found.</td></tr>
+    {{end}}
+  </tbody>
+</table>
+<nav class="pagination">
+  {{if gt .Offset 0}}
+  <button class="btn"
+    hx-get="/partials/matches?map={{.MapFilter}}&game_type={{.TypeFilter}}&limit={{.Limit}}&offset={{sub .Offset .Limit}}"
+    hx-target="#matches-container"
+    hx-swap="innerHTML">&laquo; Prev</button>
+  {{end}}
+  {{if .Total}}
+  <span>{{add .Offset 1}}–{{min (add .Offset .Limit) .Total}} of {{.Total}}</span>
+  {{else}}
+  <span>0 results</span>
+  {{end}}
+  {{if lt (add .Offset .Limit) .Total}}
+  <button class="btn"
+    hx-get="/partials/matches?map={{.MapFilter}}&game_type={{.TypeFilter}}&limit={{.Limit}}&offset={{add .Offset .Limit}}"
+    hx-target="#matches-container"
+    hx-swap="innerHTML">Next &raquo;</button>
+  {{end}}
+</nav>
+{{end}}

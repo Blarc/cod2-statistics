@@ -1,0 +1,40 @@
+{{define "partials/kill_rows"}}
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Time</th>
+      <th>Killer</th>
+      <th>Team</th>
+      <th>Victim</th>
+      <th>Team</th>
+      <th>Weapon</th>
+      <th>Dmg</th>
+      <th>Mod</th>
+      <th>HitLoc</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{range .Kills}}
+    <tr>
+      <td>{{fmtClock .Clock}}</td>
+      <td>{{if .KillerName}}{{.KillerName}}{{else}}<em>world</em>{{end}}</td>
+      <td class="team-{{.KillerTeam}}">{{.KillerTeam}}</td>
+      <td>{{.VictimName}}</td>
+      <td class="team-{{.VictimTeam}}">{{.VictimTeam}}</td>
+      <td>{{.Weapon}}</td>
+      <td>{{.Damage}}</td>
+      <td>{{.Mod}}</td>
+      <td>{{.HitLoc}}</td>
+    </tr>
+    {{else}}
+    <tr><td colspan="9" class="empty">No kill events.</td></tr>
+    {{end}}
+  </tbody>
+</table>
+{{if lt (add .Offset .Limit) .Total}}
+<button class="btn"
+  hx-get="/partials/matches/{{.MatchID}}/kills?limit={{.Limit}}&offset={{add .Offset .Limit}}"
+  hx-target="#feed-panel"
+  hx-swap="innerHTML">Load more ({{sub .Total (add .Offset .Limit)}} remaining)</button>
+{{end}}
+{{end}}

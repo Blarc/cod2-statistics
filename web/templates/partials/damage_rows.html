@@ -1,0 +1,40 @@
+{{define "partials/damage_rows"}}
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Time</th>
+      <th>Attacker</th>
+      <th>Team</th>
+      <th>Victim</th>
+      <th>Team</th>
+      <th>Weapon</th>
+      <th>Dmg</th>
+      <th>Mod</th>
+      <th>HitLoc</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{range .Damage}}
+    <tr>
+      <td>{{fmtClock .Clock}}</td>
+      <td>{{if .AttackerName}}{{.AttackerName}}{{else}}<em>world</em>{{end}}</td>
+      <td class="team-{{.AttackerTeam}}">{{.AttackerTeam}}</td>
+      <td>{{.VictimName}}</td>
+      <td class="team-{{.VictimTeam}}">{{.VictimTeam}}</td>
+      <td>{{.Weapon}}</td>
+      <td>{{.Damage}}</td>
+      <td>{{.Mod}}</td>
+      <td>{{.HitLoc}}</td>
+    </tr>
+    {{else}}
+    <tr><td colspan="9" class="empty">No damage events.</td></tr>
+    {{end}}
+  </tbody>
+</table>
+{{if lt (add .Offset .Limit) .Total}}
+<button class="btn"
+  hx-get="/partials/matches/{{.MatchID}}/damage?limit={{.Limit}}&offset={{add .Offset .Limit}}"
+  hx-target="#feed-panel"
+  hx-swap="innerHTML">Load more ({{sub .Total (add .Offset .Limit)}} remaining)</button>
+{{end}}
+{{end}}

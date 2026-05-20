@@ -1,0 +1,24 @@
+{{define "matches"}}
+{{template "header" .}}
+
+<h1>Matches</h1>
+
+<form class="filter-form"
+  hx-get="/partials/matches"
+  hx-target="#matches-container"
+  hx-swap="innerHTML">
+  <label>Map <input type="text" name="map" value="{{.MapFilter}}" placeholder="e.g. mp_decoy"></label>
+  <label>Type <input type="text" name="game_type" value="{{.TypeFilter}}" placeholder="e.g. ctf"></label>
+  <input type="hidden" name="limit" value="{{.Limit}}">
+  <button class="btn btn-primary" type="submit">Filter</button>
+  {{if or .MapFilter .TypeFilter}}
+  <a class="btn" href="/matches">Clear</a>
+  {{end}}
+</form>
+
+<div id="matches-container">
+  {{template "partials/match_rows" .}}
+</div>
+
+{{template "footer" .}}
+{{end}}

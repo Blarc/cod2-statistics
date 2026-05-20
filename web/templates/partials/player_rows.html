@@ -1,0 +1,49 @@
+{{define "partials/player_rows"}}
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Player</th>
+      <th>Kills</th>
+      <th>Deaths</th>
+      <th>K/D</th>
+      <th>HS%</th>
+      <th>Damage</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{range $i, $p := .Players}}
+    <tr>
+      <td>{{add $i (add $.Offset 1)}}</td>
+      <td><a href="/players/{{$p.Name}}">{{$p.Name}}</a></td>
+      <td>{{$p.TotalKills}}</td>
+      <td>{{$p.TotalDeaths}}</td>
+      <td>{{kd $p.TotalKills $p.TotalDeaths}}</td>
+      <td>{{headshotPct $p.TotalHeadshots $p.TotalKills}}</td>
+      <td>{{$p.TotalDamage}}</td>
+    </tr>
+    {{else}}
+    <tr><td colspan="7" class="empty">No players found.</td></tr>
+    {{end}}
+  </tbody>
+</table>
+<nav class="pagination">
+  {{if gt .Offset 0}}
+  <button class="btn"
+    hx-get="/partials/players?limit={{.Limit}}&offset={{sub .Offset .Limit}}"
+    hx-target="#players-container"
+    hx-swap="innerHTML">&laquo; Prev</button>
+  {{end}}
+  {{if .Total}}
+  <span>{{add .Offset 1}}–{{min (add .Offset .Limit) .Total}} of {{.Total}}</span>
+  {{else}}
+  <span>0 results</span>
+  {{end}}
+  {{if lt (add .Offset .Limit) .Total}}
+  <button class="btn"
+    hx-get="/partials/players?limit={{.Limit}}&offset={{add .Offset .Limit}}"
+    hx-target="#players-container"
+    hx-swap="innerHTML">Next &raquo;</button>
+  {{end}}
+</nav>
+{{end}}

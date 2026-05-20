@@ -1,0 +1,98 @@
+{{define "match"}}
+{{template "header" .}}
+
+<h1>Match Detail</h1>
+
+<div class="match-meta">
+  <div class="match-meta-item">Map <span>{{.Detail.MapName}}</span></div>
+  <div class="match-meta-item">Type <span>{{.Detail.GameType}}</span></div>
+  <div class="match-meta-item">Start <span>{{fmtClock .Detail.StartedAt}}</span></div>
+  <div class="match-meta-item">End <span>{{fmtClock .Detail.EndedAt}}</span></div>
+  <div class="match-meta-item">ID <span>{{.Detail.ID}}</span></div>
+</div>
+
+<h2>Player Leaderboard</h2>
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Player</th>
+      <th>Kills</th>
+      <th>Deaths</th>
+      <th>K/D</th>
+      <th>HS%</th>
+      <th>Damage</th>
+      <th>Fav Weapon</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{range $i, $p := .Detail.Players}}
+    <tr>
+      <td>{{add $i 1}}</td>
+      <td><a href="/players/{{$p.Name}}">{{$p.Name}}</a></td>
+      <td>{{$p.Kills}}</td>
+      <td>{{$p.Deaths}}</td>
+      <td>{{kd $p.Kills $p.Deaths}}</td>
+      <td>{{headshotPct $p.Headshots $p.Kills}}</td>
+      <td>{{$p.DamageDealt}}</td>
+      <td>{{favWeapon $p.WeaponKills}}</td>
+    </tr>
+    {{else}}
+    <tr><td colspan="8" class="empty">No player data</td></tr>
+    {{end}}
+  </tbody>
+</table>
+
+<h2>Weapon Kill Distribution</h2>
+<div class="chart-container">
+  <canvas id="weapon-chart"></canvas>
+</div>
+
+<h2>Kill Feed</h2>
+<div class="tab-bar">
+  <button class="tab-btn active"
+    hx-get="/partials/matches/{{.Detail.ID}}/kills"
+    hx-target="#feed-panel"
+    hx-trigger="click, load"
+    _="on click add .active to me remove .active from .tab-btn:not(me)">Kills</button>
+  <button class="tab-btn"
+    hx-get="/partials/matches/{{.Detail.ID}}/damage"
+    hx-target="#feed-panel"
+    hx-trigger="click"
+    _="on click add .active to me remove .active from .tab-btn:not(me)">Damage</button>
+</div>
+<div id="feed-panel"></div>
+
+<script>
+(function() {
+  var weaponData = {{.WeaponChart}};
+  document.addEventListener('DOMContentLoaded', function() {
+    var entries = Object.entries(weaponData).sort(function(a,b){ return b[1]-a[1]; });
+    if (!entries.length) return;
+    new Chart(document.getElementById('weapon-chart'), {
+      type: 'bar',
+      data: {
+        labels: entries.map(function(e){ return e[0]; }),
+        datasets: [{
+          label: 'Kills',
+          data: entries.map(function(e){ return e[1]; }),
+          backgroundColor: '#b8971a',
+          borderColor: '#d4a820',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#c8c8b0' }, grid: { color: '#2e2e2e' } },
+          y: { ticks: { color: '#c8c8b0' }, grid: { color: '#2e2e2e' }, beginAtZero: true }
+        }
+      }
+    });
+  });
+})();
+</script>
+
+{{template "footer" .}}
+{{end}}

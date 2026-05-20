@@ -1,0 +1,70 @@
+{{define "index"}}
+{{template "header" .}}
+
+<h1>Dashboard</h1>
+
+<div class="dashboard-grid">
+  <section>
+    <h2>Recent Matches</h2>
+    {{if .Matches}}
+    <table class="data-table">
+      <thead>
+        <tr><th>Map</th><th>Type</th><th>Clock</th></tr>
+      </thead>
+      <tbody>
+        {{range .Matches}}
+        <tr>
+          <td><a href="/matches/{{.ID}}">{{.MapName}}</a></td>
+          <td>{{.GameType}}</td>
+          <td>{{fmtClock .StartedAt}}</td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+    {{else}}
+    <p class="empty">No matches yet.</p>
+    {{end}}
+    <a class="btn" href="/matches">All matches &raquo;</a>
+  </section>
+
+  <section>
+    <h2>Top Players</h2>
+    {{if .Players}}
+    <table class="data-table">
+      <thead>
+        <tr><th>Player</th><th>Kills</th><th>Deaths</th><th>K/D</th></tr>
+      </thead>
+      <tbody>
+        {{range .Players}}
+        <tr>
+          <td><a href="/players/{{.Name}}">{{.Name}}</a></td>
+          <td>{{.TotalKills}}</td>
+          <td>{{.TotalDeaths}}</td>
+          <td>{{kd .TotalKills .TotalDeaths}}</td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+    {{else}}
+    <p class="empty">No players yet.</p>
+    {{end}}
+    <a class="btn" href="/players">All players &raquo;</a>
+  </section>
+</div>
+
+<div class="poll-card">
+  <strong>Poll Status</strong> &mdash;
+  {{if .Poll.Ready}}
+  <span class="poll-ready">&#10003; Active</span> &mdash;
+  {{if .Poll.LastPollTime}}Last poll: {{.Poll.LastPollTime.Format "2006-01-02 15:04:05 UTC"}}{{end}} &mdash;
+  {{.Poll.PollCount}} polls completed
+  {{else}}
+  <span class="poll-error">No poll completed yet</span>
+  {{end}}
+  {{if .Poll.LastError}}
+  &mdash; <span class="poll-error">Error: {{.Poll.LastError}}</span>
+  {{end}}
+</div>
+
+{{template "footer" .}}
+{{end}}

@@ -1,0 +1,121 @@
+{{define "player"}}
+{{template "header" .}}
+
+<h1>{{.Detail.Name}}</h1>
+{{if .Detail.Aliases}}
+<p class="aliases">Also known as: {{range $i, $a := .Detail.Aliases}}{{if $i}}, {{end}}{{$a}}{{end}}</p>
+{{end}}
+
+<h2>Fun Stats</h2>
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-label">K/D Ratio</div>
+    <div class="stat-value">{{.Fun.KD}}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Headshot %</div>
+    <div class="stat-value">{{.Fun.HeadshotPct}}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Nemesis</div>
+    <div class="stat-value">{{.Fun.Nemesis}}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Fav Prey</div>
+    <div class="stat-value">{{.Fun.FavPrey}}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Fav Weapon</div>
+    <div class="stat-value">{{.Fun.FavWeapon}}</div>
+  </div>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-label">Total Kills</div>
+    <div class="stat-value">{{.Detail.TotalKills}}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Total Deaths</div>
+    <div class="stat-value">{{.Detail.TotalDeaths}}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Total Headshots</div>
+    <div class="stat-value">{{.Detail.TotalHeadshots}}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Total Damage</div>
+    <div class="stat-value">{{.Detail.TotalDamage}}</div>
+  </div>
+</div>
+
+<h2>Weapon Distribution</h2>
+<div class="chart-container">
+  <canvas id="weapon-chart"></canvas>
+</div>
+
+<h2>Match History</h2>
+{{if .Detail.Matches}}
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Match</th>
+      <th>Kills</th>
+      <th>Deaths</th>
+      <th>K/D</th>
+      <th>HS%</th>
+      <th>Damage</th>
+      <th>Fav Weapon</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{range .Detail.Matches}}
+    <tr>
+      <td><a href="/matches/{{.MatchID}}">{{.MatchID}}</a></td>
+      <td>{{.Kills}}</td>
+      <td>{{.Deaths}}</td>
+      <td>{{kd .Kills .Deaths}}</td>
+      <td>{{headshotPct .Headshots .Kills}}</td>
+      <td>{{.DamageDealt}}</td>
+      <td>{{favWeapon .WeaponKills}}</td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>
+{{else}}
+<p class="empty">No match history.</p>
+{{end}}
+
+<script>
+(function() {
+  var weaponData = {{.WeaponChart}};
+  document.addEventListener('DOMContentLoaded', function() {
+    var entries = Object.entries(weaponData).sort(function(a,b){ return b[1]-a[1]; });
+    if (!entries.length) return;
+    new Chart(document.getElementById('weapon-chart'), {
+      type: 'bar',
+      data: {
+        labels: entries.map(function(e){ return e[0]; }),
+        datasets: [{
+          label: 'Kills',
+          data: entries.map(function(e){ return e[1]; }),
+          backgroundColor: '#4e6a28',
+          borderColor: '#5e8030',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#c8c8b0' }, grid: { color: '#2e2e2e' } },
+          y: { ticks: { color: '#c8c8b0' }, grid: { color: '#2e2e2e' }, beginAtZero: true }
+        }
+      }
+    });
+  });
+})();
+</script>
+
+{{template "footer" .}}
+{{end}}
