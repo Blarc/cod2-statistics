@@ -124,7 +124,7 @@ func TestContinuationKeepsSameMatchAcrossPolls(t *testing.T) {
 	}
 }
 
-func TestContinuationClockDropStartsNewMatch(t *testing.T) {
+func TestContinuationIgnoresCrossPollClockDrop(t *testing.T) {
 	cont := &matcher.Continuation{
 		MatchID:   "existing-match",
 		MapName:   "mp_toujane",
@@ -142,8 +142,8 @@ func TestContinuationClockDropStartsNewMatch(t *testing.T) {
 	if len(got) != 1 {
 		t.Fatalf("matches = %d, want 1", len(got))
 	}
-	if got[0].ID == cont.MatchID {
-		t.Fatalf("clock reset should start a new match; got same ID %q", got[0].ID)
+	if got[0].ID != cont.MatchID {
+		t.Fatalf("cross-poll drop should keep match; got %q want %q", got[0].ID, cont.MatchID)
 	}
 }
 

@@ -57,7 +57,6 @@ func ProcessLinesWithState(lines []*model.RawLine, cont *Continuation) ([]*model
 	prevClock := -1
 	if cont != nil && cont.MatchID != "" {
 		current = newContinuationBuilder(cont)
-		prevClock = cont.LastClock
 	}
 
 	for _, rl := range lines {

@@ -56,10 +56,11 @@ func (p *Poller) pollOnce(ctx context.Context) error {
 
 	var startTime time.Time
 	if status.LastPollTime != nil {
-		startTime = *status.LastPollTime
+		startTime = status.LastPollTime.Add(1 * time.Nanosecond)
 	} else {
 		startTime = time.Now().Add(-p.cfg.LokiInitialLookback)
 	}
+	queryEnd := time.Now().UTC()
 
 	lokiCfg := loki.Config{
 		URL:      p.cfg.LokiURL,
@@ -67,6 +68,7 @@ func (p *Poller) pollOnce(ctx context.Context) error {
 		Username: p.cfg.LokiUsername,
 		Password: p.cfg.LokiPassword,
 		Start:    startTime.UTC().Format(time.RFC3339Nano),
+		End:      queryEnd.Format(time.RFC3339Nano),
 	}
 
 	rawLines, err := loki.FetchLines(ctx, lokiCfg)
@@ -126,7 +128,7 @@ func (p *Poller) pollOnce(ctx context.Context) error {
 		return fmt.Errorf("set open match state: %w", err)
 	}
 
-	if err := p.store.SetLastPollNS(time.Now().UnixNano()); err != nil {
+	if err := p.store.SetLastPollNS(queryEnd.UnixNano()); err != nil {
 		return fmt.Errorf("set last poll ns: %w", err)
 	}
 	if err := p.store.IncrementPollCount(); err != nil {
