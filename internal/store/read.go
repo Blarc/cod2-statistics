@@ -18,6 +18,7 @@ type MatchSummary struct {
 
 type PlayerMatchStat struct {
 	MatchID     string         `json:"match_id,omitempty"`
+	MapName     string         `json:"map_name,omitempty"`
 	Name        string         `json:"name"`
 	Aliases     []string       `json:"aliases,omitempty"`
 	Kills       int            `json:"kills"`
@@ -372,7 +373,7 @@ func (s *Store) GetPlayer(name string) (*PlayerDetail, error) {
 	_ = json.Unmarshal([]byte(aliasesJSON), &pd.Aliases)
 
 	rows, err := s.db.Query(`
-		SELECT m.id, mps.kills, mps.deaths, mps.damage_dealt, mps.damage_taken,
+		SELECT m.id, m.map_name, mps.kills, mps.deaths, mps.damage_dealt, mps.damage_taken,
 			mps.headshots, mps.weapon_kills, mps.event_count
 		FROM match_player_stats mps
 		JOIN matches m ON m.id = mps.match_id
@@ -387,7 +388,7 @@ func (s *Store) GetPlayer(name string) (*PlayerDetail, error) {
 	for rows.Next() {
 		var ps PlayerMatchStat
 		var weaponJSON string
-		if err := rows.Scan(&ps.MatchID, &ps.Kills, &ps.Deaths,
+		if err := rows.Scan(&ps.MatchID, &ps.MapName, &ps.Kills, &ps.Deaths,
 			&ps.DamageDealt, &ps.DamageTaken, &ps.Headshots, &weaponJSON, &ps.EventCount); err != nil {
 			return nil, err
 		}

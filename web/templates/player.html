@@ -59,7 +59,7 @@
 <table class="data-table">
   <thead>
     <tr>
-      <th>Match</th>
+      <th>Map</th>
       <th>Kills</th>
       <th>Deaths</th>
       <th>K/D</th>
@@ -71,7 +71,7 @@
   <tbody>
     {{range .Detail.Matches}}
     <tr>
-      <td><a href="/matches/{{.MatchID}}">{{.MatchID}}</a></td>
+      <td><a href="/matches/{{.MatchID}}">{{.MapName}}</a></td>
       <td>{{.Kills}}</td>
       <td>{{.Deaths}}</td>
       <td>{{kd .Kills .Deaths}}</td>
