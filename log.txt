@@ -1,0 +1,402 @@
+12917:34 ------------------------------------------------------------
+12917:34 ShutdownGame:
+==== ShutdownGame ====
+Setting map: mp_toujane.
+Setting g_gametype: dm.
+"sv_mapRotationCurrent" is:""
+"sv_mapRotation" is:"gametype dm map mp_toujane"
+map_rotate...
+12917:34 ExitLevel: executed
+1:puci EXE_DISCONNECTED
+12917:33 Q;0;1;puci
+12917:24 W;;0;gg^3^4hu^1nt
+12917:23 Weapon;0;4;v hrbet;frag_grenade_german_mp
+12917:22 D;0;4;allies;v hrbet;;-1;world;;none;4;MOD_FALLING;none
+12917:16 K;0;0;;gg^3^4hu^1nt;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12917:12 K;0;4;;v hrbet;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12917:12 K;0;1;;puci;0;4;;v hrbet;sten_mp;105;MOD_HEAD_SHOT;head
+12916:59 K;0;4;;v hrbet;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12916:58 K;0;0;;gg^3^4hu^1nt;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;left_leg_upper
+12916:57 D;0;0;axis;gg^3^4hu^1nt;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12916:55 K;0;4;;v hrbet;0;4;;v hrbet;none;100000;MOD_SUICIDE;none
+12916:53 D;0;3;axis;s4ywoot;0;4;axis;v hrbet;frag_grenade_german_mp;52;MOD_GRENADE_SPLASH;none
+12916:51 K;0;0;;gg^3^4hu^1nt;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12916:50 K;0;4;;v hrbet;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12916:50 D;0;4;axis;v hrbet;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;neck
+12916:44 Weapon;0;3;s4ywoot;frag_grenade_german_mp
+12916:37 K;0;4;;v hrbet;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12916:37 D;0;4;axis;v hrbet;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12916:31 K;0;0;;gg^3^4hu^1nt;0;4;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12916:29 K;0;1;;puci;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12916:26 K;0;3;;s4ywoot;0;4;;v hrbet;frag_grenade_german_mp;138;MOD_GRENADE_SPLASH;none
+12916:24 K;0;4;;v hrbet;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12916:24 D;0;4;axis;v hrbet;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12916:21 D;0;3;axis;s4ywoot;0;4;axis;v hrbet;kar98k_mp;90;MOD_RIFLE_BULLET;right_leg_upper
+12916:20 D;0;1;allies;puci;0;3;axis;s4ywoot;kar98k_mp;90;MOD_RIFLE_BULLET;left_leg_upper
+Sending heartbeat to cod2master.activision.com
+12916:14 K;0;0;;gg^3^4hu^1nt;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12916:03 K;0;4;;v hrbet;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;neck
+12916:01 D;0;4;axis;v hrbet;0;1;allies;puci;m1garand_mp;45;MOD_RIFLE_BULLET;left_leg_lower
+12915:45 K;0;1;;puci;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12915:45 K;0;0;;gg^3^4hu^1nt;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12915:45 D;0;0;axis;gg^3^4hu^1nt;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12915:42 K;0;4;;v hrbet;0;1;;puci;m1garand_mp;135;MOD_HEAD_SHOT;head
+12915:42 D;0;4;axis;v hrbet;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12915:37 Weapon;0;0;gghunt;frag_grenade_german_mp
+12915:33 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;neck
+12915:30 Weapon;0;4;v hrbet;kar98k_mp
+12915:25 Weapon;0;4;v hrbet;frag_grenade_british_mp
+12915:23 K;0;0;;gg^3^4hu^1nt;0;4;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12915:22 K;0;1;;puci;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12915:21 D;0;4;axis;v hrbet;0;0;axis;gg^3^4hu^1nt;kar98k_mp;45;MOD_RIFLE_BULLET;right_leg_lower
+12915:09 K;0;0;;gg^3^4hu^1nt;0;1;;puci;m1garand_mp;45;MOD_RIFLE_BULLET;left_leg_lower
+12915:08 D;0;0;axis;gg^3^4hu^1nt;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12915:04 K;0;1;;puci;0;0;;gg^3^4hu^1nt;mg42_bipod_stand_mp;105;MOD_HEAD_SHOT;head
+12914:57 D;0;3;axis;s4ywoot;;-1;world;;none;3;MOD_FALLING;none
+12914:56 Weapon;0;1;puci;frag_grenade_british_mp
+12914:56 Weapon;0;1;puci;m1garand_mp
+12914:53 K;0;4;;v hrbet;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12914:46 K;0;0;;gg^3^4hu^1nt;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_upper
+12914:46 D;0;0;axis;gg^3^4hu^1nt;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12914:44 K;0;3;;s4ywoot;0;4;;v hrbet;kar98k_mp;270;MOD_HEAD_SHOT;head
+12914:35 K;0;4;;v hrbet;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12914:33 K;0;0;;gg^3^4hu^1nt;0;4;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12914:28 K;0;1;;puci;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12914:21 K;0;0;;gg^3^4hu^1nt;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12914:20 D;0;0;axis;gg^3^4hu^1nt;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12914:12 K;0;0;;gg^3^4hu^1nt;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12914:09 K;0;1;;puci;0;0;;gg^3^4hu^1nt;m1garand_mp;90;MOD_RIFLE_BULLET;right_leg_upper
+12914:09 D;0;1;allies;puci;0;0;axis;gg^3^4hu^1nt;m1garand_mp;90;MOD_RIFLE_BULLET;torso_upper
+12914:07 Weapon;0;0;gghunt;m1garand_mp
+12914:06 K;0;4;;v hrbet;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12914:04 K;0;1;;puci;0;4;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12914:01 K;0;3;;s4ywoot;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12914:00 D;0;3;axis;s4ywoot;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12913:57 Weapon;0;1;puci;frag_grenade_german_mp
+12913:53 K;0;0;;gg^3^4hu^1nt;0;1;;puci;m1garand_mp;45;MOD_RIFLE_BULLET;right_leg_lower
+12913:53 D;0;0;axis;gg^3^4hu^1nt;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12913:45 K;0;3;;s4ywoot;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;right_leg_upper
+12913:44 D;0;3;axis;s4ywoot;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;left_leg_upper
+12913:42 K;0;4;;v hrbet;0;1;;puci;frag_grenade_british_mp;118;MOD_GRENADE_SPLASH;none
+12913:40 K;0;1;;puci;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;right_arm_upper
+12913:22 D;0;0;axis;gg^3^4hu^1nt;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;left_leg_upper
+12913:16 K;0;1;;puci;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;right_arm_upper
+12913:16 K;0;4;;v hrbet;0;1;;puci;m1garand_mp;135;MOD_HEAD_SHOT;head
+Sending heartbeat to cod2master.activision.com
+12913:10 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+2:v hrbet EXE_PLAYERKICKED
+12913:03 Q;0;2;v hrbet
+12912:59 K;0;0;;gg^3^4hu^1nt;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12912:57 J;0;4;v hrbet
+Going from CS_FREE to CS_CONNECTED for  (num 4 guid 0)
+Connecting player #4 has a zero GUID
+Client 16 connecting with 0 challenge ping from 192.168.1.14:28960
+12912:50 K;0;2;;v hrbet;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;left_arm_upper
+12912:35 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12912:34 K;0;3;;s4ywoot;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12912:25 K;0;0;;gg^3^4hu^1nt;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12912:23 Weapon;0;0;gghunt;m1garand_mp
+12912:23 Weapon;0;0;gghunt;frag_grenade_british_mp
+12912:15 Weapon;0;1;puci;frag_grenade_german_mp
+12912:13 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12912:05 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12912:01 K;0;2;;v hrbet;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12911:58 D;0;2;axis;v hrbet;0;0;axis;gg^3^4hu^1nt;kar98k_mp;90;MOD_RIFLE_BULLET;left_hand
+12911:54 K;0;2;;v hrbet;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12911:52 D;0;0;axis;gg^3^4hu^1nt;0;2;axis;v hrbet;kar98k_mp;90;MOD_RIFLE_BULLET;right_leg_upper
+12911:44 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12911:44 K;0;1;;puci;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12911:41 Weapon;0;0;gghunt;kar98k_mp
+12911:36 Weapon;0;2;v hrbet;frag_grenade_german_mp
+12911:32 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12911:25 Weapon;0;1;puci;frag_grenade_german_mp
+12911:17 K;0;2;;v hrbet;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_upper
+12911:17 D;0;2;axis;v hrbet;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;left_arm_upper
+12911:15 Weapon;0;3;s4ywoot;frag_grenade_german_mp
+12911:14 K;0;2;;v hrbet;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12911:11 K;0;1;;puci;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12911:05 K;0;0;;gg^3^4hu^1nt;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12911:05 D;0;0;axis;gg^3^4hu^1nt;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12910:59 D;0;1;allies;puci;0;0;axis;gg^3^4hu^1nt;m1garand_mp;90;MOD_RIFLE_BULLET;torso_upper
+12910:58 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;m1garand_mp;135;MOD_HEAD_SHOT;head
+12910:58 D;0;3;axis;s4ywoot;0;0;axis;gg^3^4hu^1nt;m1garand_mp;90;MOD_RIFLE_BULLET;torso_upper
+12910:52 Weapon;0;0;gghunt;frag_grenade_german_mp
+12910:52 K;0;2;;v hrbet;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;right_leg_upper
+12910:52 D;0;2;axis;v hrbet;0;1;allies;puci;m1garand_mp;45;MOD_RIFLE_BULLET;left_leg_lower
+12910:46 K;0;1;;puci;0;0;;gg^3^4hu^1nt;m1garand_mp;90;MOD_RIFLE_BULLET;right_leg_upper
+12910:46 D;0;1;allies;puci;0;0;axis;gg^3^4hu^1nt;m1garand_mp;45;MOD_RIFLE_BULLET;left_leg_lower
+12910:43 D;0;0;axis;gg^3^4hu^1nt;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12910:36 K;0;2;;v hrbet;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12910:36 D;0;2;axis;v hrbet;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_upper
+12910:31 K;0;3;;s4ywoot;0;1;;puci;m1garand_mp;135;MOD_HEAD_SHOT;head
+12910:22 D;0;2;axis;v hrbet;0;1;allies;puci;m1garand_mp;45;MOD_RIFLE_BULLET;left_leg_lower
+12910:21 Weapon;0;0;gghunt;frag_grenade_british_mp
+12910:21 Weapon;0;0;gghunt;m1garand_mp
+12910:16 K;0;1;;puci;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;right_arm_upper
+Sending heartbeat to cod2master.activision.com
+12910:14 K;0;2;;v hrbet;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12910:14 Weapon;0;1;puci;frag_grenade_german_mp
+12910:13 D;0;2;axis;v hrbet;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12910:05 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12910:01 K;0;2;;v hrbet;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;right_leg_upper
+12910:01 D;0;2;axis;v hrbet;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12910:00 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12909:59 K;0;3;;s4ywoot;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12909:57 D;0;0;axis;gg^3^4hu^1nt;0;3;axis;s4ywoot;kar98k_mp;90;MOD_RIFLE_BULLET;left_arm_lower
+12909:56 Weapon;0;3;s4ywoot;frag_grenade_german_mp
+12909:48 K;0;0;;gg^3^4hu^1nt;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;neck
+12909:46 K;0;1;;puci;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12909:44 K;0;2;;v hrbet;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_upper
+12909:44 D;0;2;axis;v hrbet;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_upper
+12909:43 Weapon;0;1;puci;frag_grenade_british_mp
+12909:39 Weapon;0;0;gghunt;kar98k_mp
+12909:36 K;0;1;;puci;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12909:33 Weapon;0;1;puci;kar98k_mp
+12909:29 K;0;1;;puci;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12909:27 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;m1garand_mp;90;MOD_RIFLE_BULLET;right_leg_upper
+12909:27 D;0;3;axis;s4ywoot;0;0;axis;gg^3^4hu^1nt;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12909:19 K;0;2;;v hrbet;0;3;;s4ywoot;kar98k_mp;270;MOD_HEAD_SHOT;head
+12909:10 K;0;2;;v hrbet;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12909:10 D;0;2;axis;v hrbet;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_upper
+12909:08 Weapon;0;0;gghunt;frag_grenade_british_mp
+12909:08 Weapon;0;0;gghunt;m1garand_mp
+12909:05 K;0;3;;s4ywoot;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12908:58 K;0;1;;puci;0;0;;gg^3^4hu^1nt;luger_mp;45;MOD_PISTOL_BULLET;right_leg_upper
+12908:57 D;0;0;axis;gg^3^4hu^1nt;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12908:57 D;0;1;allies;puci;0;0;axis;gg^3^4hu^1nt;kar98k_mp;90;MOD_RIFLE_BULLET;right_leg_upper
+12908:51 K;0;2;;v hrbet;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;right_leg_upper
+12908:51 D;0;2;axis;v hrbet;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12908:48 Weapon;0;2;v hrbet;frag_grenade_british_mp
+12908:46 Weapon;0;1;puci;frag_grenade_british_mp
+12908:40 K;0;1;;puci;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12908:32 K;0;0;;gg^3^4hu^1nt;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12908:32 D;0;0;axis;gg^3^4hu^1nt;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_upper
+12908:22 K;0;2;;v hrbet;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;left_arm_upper
+12908:18 K;0;2;;v hrbet;0;1;;puci;m1garand_mp;135;MOD_HEAD_SHOT;head
+12908:17 Weapon;0;2;v hrbet;kar98k_mp
+12908:15 Weapon;0;1;puci;kar98k_mp
+12908:14 Weapon;0;1;puci;frag_grenade_british_mp
+12908:12 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12908:09 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;luger_mp;45;MOD_PISTOL_BULLET;left_arm_upper
+12908:06 D;0;3;axis;s4ywoot;0;0;axis;gg^3^4hu^1nt;kar98k_mp;90;MOD_RIFLE_BULLET;left_leg_upper
+12908:04 K;0;1;;puci;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12908:00 Weapon;0;0;gghunt;frag_grenade_german_mp
+12907:57 K;0;2;;v hrbet;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12907:57 D;0;2;axis;v hrbet;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12907:56 D;0;3;axis;s4ywoot;0;2;axis;v hrbet;kar98k_mp;90;MOD_RIFLE_BULLET;left_leg_upper
+12907:49 K;0;0;;gg^3^4hu^1nt;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12907:44 K;0;1;;puci;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12907:42 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;kar98k_mp;270;MOD_HEAD_SHOT;head
+12907:38 K;0;0;;gg^3^4hu^1nt;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;right_arm_upper
+12907:37 D;0;0;axis;gg^3^4hu^1nt;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;left_leg_upper
+12907:31 Weapon;0;0;gghunt;kar98k_mp
+12907:29 K;0;2;;v hrbet;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12907:26 Weapon;0;0;gghunt;frag_grenade_german_mp
+12907:26 K;0;2;;v hrbet;0;0;;gg^3^4hu^1nt;kar98k_mp;270;MOD_HEAD_SHOT;head
+12907:20 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;left_arm_upper
+12907:20 K;0;2;;v hrbet;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;neck
+Sending heartbeat to cod2master.activision.com
+12907:15 K;0;1;;puci;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12907:13 K;0;0;;gg^3^4hu^1nt;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12907:13 D;0;0;axis;gg^3^4hu^1nt;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12907:02 K;0;2;;v hrbet;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;right_arm_upper
+12907:02 D;0;2;axis;v hrbet;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12906:59 Weapon;0;2;v hrbet;frag_grenade_german_mp
+12906:59 Weapon;0;2;v hrbet;kar98k_mp
+12906:55 K;0;3;;s4ywoot;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;right_leg_upper
+12906:55 D;0;3;axis;s4ywoot;0;1;allies;puci;m1garand_mp;45;MOD_RIFLE_BULLET;right_leg_lower
+12906:47 Weapon;0;1;puci;kar98k_mp
+12906:47 Weapon;0;1;puci;frag_grenade_german_mp
+12906:37 K;0;1;;puci;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12906:32 D;0;2;axis;v hrbet;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12906:31 Weapon;0;0;gghunt;frag_grenade_german_mp
+12906:24 K;0;1;;puci;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12906:23 K;0;2;;v hrbet;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12906:22 D;0;2;axis;v hrbet;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;left_leg_upper
+12906:18 K;0;3;;s4ywoot;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12906:13 K;0;0;;gg^3^4hu^1nt;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;right_leg_upper
+12906:12 D;0;0;axis;gg^3^4hu^1nt;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;neck
+12906:12 K;0;2;;v hrbet;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12906:08 K;0;1;;puci;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12906:03 K;0;0;;gg^3^4hu^1nt;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12906:03 D;0;0;axis;gg^3^4hu^1nt;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12905:59 D;0;2;axis;v hrbet;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12905:55 Weapon;0;1;puci;frag_grenade_german_mp
+12905:52 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12905:43 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12905:42 D;0;2;axis;v hrbet;0;0;axis;gg^3^4hu^1nt;kar98k_mp;90;MOD_RIFLE_BULLET;right_leg_lower
+12905:33 K;0;1;;puci;0;2;;v hrbet;kar98k_mp;154;MOD_MELEE;right_leg_upper
+12905:33 Weapon;0;2;v hrbet;kar98k_mp
+12905:29 Weapon;0;1;puci;kar98k_mp
+12905:27 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12905:26 K;0;3;;s4ywoot;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12905:24 K;0;1;;puci;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12905:19 Weapon;0;0;gghunt;frag_grenade_german_mp
+12905:19 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12905:14 Weapon;0;2;v hrbet;kar98k_mp
+12905:12 K;0;1;;puci;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12905:08 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12905:03 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12904:59 Weapon;0;1;puci;m1garand_mp
+12904:58 K;0;0;;gg^3^4hu^1nt;0;1;;puci;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12904:57 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12904:49 Weapon;0;1;puci;kar98k_mp
+12904:45 K;0;0;;gg^3^4hu^1nt;0;1;;puci;m1garand_mp;135;MOD_HEAD_SHOT;head
+12904:44 D;0;0;axis;gg^3^4hu^1nt;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12904:44 Weapon;0;1;puci;frag_grenade_british_mp
+12904:42 K;0;3;;s4ywoot;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12904:39 Weapon;0;0;gghunt;m1garand_mp
+12904:36 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;kar98k_mp;229;MOD_MELEE;torso_lower
+12904:36 Weapon;0;0;gghunt;frag_grenade_german_mp
+12904:33 D;0;2;axis;v hrbet;0;0;axis;gg^3^4hu^1nt;frag_grenade_german_mp;73;MOD_GRENADE_SPLASH;none
+12904:32 K;0;1;;puci;0;3;;s4ywoot;luger_mp;45;MOD_PISTOL_BULLET;right_leg_upper
+12904:29 D;0;1;allies;puci;0;3;axis;s4ywoot;kar98k_mp;90;MOD_RIFLE_BULLET;right_leg_lower
+12904:29 D;0;3;axis;s4ywoot;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;right_arm_upper
+12904:23 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;270;MOD_HEAD_SHOT;head
+12904:20 D;0;3;axis;s4ywoot;0;1;allies;puci;frag_grenade_british_mp;78;MOD_GRENADE_SPLASH;none
+Sending heartbeat to cod2master.activision.com
+12904:05 Weapon;0;3;s4ywoot;frag_grenade_german_mp
+12904:00 K;0;1;;puci;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12903:59 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12903:53 K;0;2;;v hrbet;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12903:52 Weapon;0;0;gghunt;frag_grenade_british_mp
+12903:51 K;0;1;;puci;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12903:45 Weapon;0;2;v hrbet;kar98k_mp
+12903:45 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;153;MOD_MELEE;left_leg_upper
+12903:42 K;0;1;;puci;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12903:40 D;0;2;axis;v hrbet;0;1;allies;puci;m1garand_mp;45;MOD_RIFLE_BULLET;right_arm_lower
+12903:27 K;0;3;;s4ywoot;0;1;;puci;m1garand_mp;135;MOD_HEAD_SHOT;head
+12903:19 K;0;0;;gg^3^4hu^1nt;0;1;;puci;m1garand_mp;135;MOD_HEAD_SHOT;head
+12903:13 K;0;1;;puci;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12903:12 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12903:10 Weapon;0;0;gghunt;frag_grenade_german_mp
+12903:09 K;0;1;;puci;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;neck
+12903:09 D;0;2;axis;v hrbet;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;torso_lower
+12903:05 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;frag_grenade_german_mp;110;MOD_GRENADE_SPLASH;none
+12903:04 K;0;2;;v hrbet;0;1;;puci;m1garand_mp;90;MOD_RIFLE_BULLET;neck
+12903:00 D;0;2;axis;v hrbet;0;1;allies;puci;m1garand_mp;90;MOD_RIFLE_BULLET;left_leg_upper
+12902:56 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12902:48 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12902:44 K;0;1;;puci;0;3;;s4ywoot;kar98k_mp;270;MOD_HEAD_SHOT;head
+12902:38 K;0;2;;v hrbet;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12902:33 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12902:29 K;0;1;;puci;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12902:26 K;0;3;;s4ywoot;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12902:19 K;0;1;;puci;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12902:02 K;0;0;;gg^3^4hu^1nt;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12901:54 K;0;2;;v hrbet;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12901:49 K;0;3;;s4ywoot;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12901:49 K;0;0;;gg^3^4hu^1nt;0;1;;puci;enfield_mp;135;MOD_RIFLE_BULLET;torso_lower
+12901:43 K;0;2;;v hrbet;0;0;;gg^3^4hu^1nt;kar98k_mp;270;MOD_HEAD_SHOT;head
+12901:37 K;0;3;;s4ywoot;0;1;;puci;enfield_mp;225;MOD_MELEE;torso_upper
+12901:35 K;0;2;;v hrbet;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;neck
+12901:27 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_sniper_mp;135;MOD_RIFLE_BULLET;torso_lower
+12901:19 D;0;2;axis;v hrbet;0;3;axis;s4ywoot;frag_grenade_german_mp;27;MOD_GRENADE_SPLASH;none
+Sending heartbeat to cod2master.activision.com
+12901:12 Weapon;0;0;gghunt;frag_grenade_german_mp
+12901:12 Weapon;0;0;gghunt;kar98k_mp
+12901:04 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12901:02 Weapon;0;0;gghunt;frag_grenade_german_mp
+12900:58 K;0;1;;puci;0;2;;v hrbet;kar98k_sniper_mp;135;MOD_RIFLE_BULLET;torso_lower
+12900:48 K;0;0;;gg^3^4hu^1nt;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12900:45 D;0;1;allies;puci;0;2;axis;v hrbet;kar98k_sniper_mp;90;MOD_RIFLE_BULLET;right_arm_lower
+12900:41 K;0;0;;gg^3^4hu^1nt;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12900:32 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12900:24 D;0;0;axis;gg^3^4hu^1nt;0;3;axis;s4ywoot;kar98k_mp;90;MOD_RIFLE_BULLET;left_leg_lower
+12900:23 K;0;1;;puci;0;2;;v hrbet;kar98k_sniper_mp;270;MOD_HEAD_SHOT;head
+12900:20 D;0;2;axis;v hrbet;0;0;axis;gg^3^4hu^1nt;kar98k_mp;90;MOD_RIFLE_BULLET;right_leg_upper
+12900:17 Weapon;0;0;gghunt;frag_grenade_german_mp
+12900:15 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12900:11 K;0;2;;v hrbet;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12900:03 K;0;2;;v hrbet;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12899:59 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;neck
+12899:57 Weapon;0;0;gghunt;frag_grenade_british_mp
+12899:54 Weapon;0;0;gghunt;frag_grenade_german_mp
+12899:51 K;0;3;;s4ywoot;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12899:46 Weapon;0;2;v hrbet;kar98k_mp
+12899:42 K;0;1;;puci;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12899:40 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12899:37 D;0;0;axis;gg^3^4hu^1nt;0;1;allies;puci;enfield_mp;90;MOD_RIFLE_BULLET;right_leg_upper
+12899:34 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_upper
+12899:34 Weapon;0;2;v hrbet;kar98k_mp
+12899:24 K;0;2;;v hrbet;0;3;;s4ywoot;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12899:18 K;0;2;;v hrbet;0;1;;puci;enfield_mp;135;MOD_RIFLE_BULLET;torso_upper
+12899:13 Weapon;0;0;gghunt;frag_grenade_german_mp
+12899:12 K;0;3;;s4ywoot;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12899:05 K;0;2;;v hrbet;0;1;;puci;enfield_mp;135;MOD_RIFLE_BULLET;torso_lower
+12899:01 D;0;1;allies;puci;0;2;axis;v hrbet;kar98k_mp;90;MOD_RIFLE_BULLET;right_arm_lower
+12898:59 D;0;2;axis;v hrbet;0;1;allies;puci;enfield_mp;90;MOD_RIFLE_BULLET;left_leg_upper
+12898:59 K;0;0;;gg^3^4hu^1nt;0;2;;v hrbet;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12898:55 K;0;1;;puci;0;0;;gg^3^4hu^1nt;frag_grenade_german_mp;72;MOD_GRENADE_SPLASH;none
+12898:54 Weapon;0;0;gghunt;kar98k_mp
+12898:54 Weapon;0;0;gghunt;frag_grenade_german_mp
+12898:50 D;0;1;allies;puci;0;3;axis;s4ywoot;luger_mp;45;MOD_PISTOL_BULLET;torso_lower
+12898:44 K;0;2;;v hrbet;0;0;;gg^3^4hu^1nt;kar98k_mp;135;MOD_RIFLE_BULLET;torso_lower
+12898:43 D;0;2;axis;v hrbet;0;1;allies;puci;enfield_mp;90;MOD_RIFLE_BULLET;left_hand
+12898:38 K;0;0;;gg^3^4hu^1nt;0;1;;puci;enfield_mp;135;MOD_RIFLE_BULLET;torso_upper
+12898:30 K;0;0;;gg^3^4hu^1nt;0;1;;puci;enfield_mp;135;MOD_RIFLE_BULLET;torso_lower
+12898:23 J;0;1;puci
+12898:20 J;0;2;v hrbet
+12898:19 J;0;3;s4ywoot
+12898:18 J;0;0;gg^3^4hu^1nt
+Sending heartbeat to cod2master.activision.com
+Hitch warning: 1301 msec frame time
+PunkBuster Server: Preparing to Disable PB Server... (/home/cod2/.callofduty2/pb/)
+-----------------------------------
+-----------------------------------
+12898:14 InitGame: \_Admin\Blarc\_Email\jakob.malezic@gmail.com\_Location\Slovenia\_Website\https://github.com/Blarc\g_antilag\1\g_gametype\dm\gamename\Call of Duty 2\mapname\mp_toujane\protocol\118\scr_friendlyfire\0\scr_killcam\1\shortversion\1.3\sv_allowAnonymous\0\sv_floodProtect\1\sv_hostname\Kubernetes powered server.\sv_maxclients\32\sv_maxPing\999\sv_maxRate\25000\sv_minPing\0\sv_privateClients\0\sv_punkbuster\0\sv_pure\1\sv_voice\1
+12898:14 ------------------------------------------------------------
+gamedate: Jun 23 2006
+gamename: Call of Duty 2
+------- Game Initialization -------
+81663 files in iwd files
+----------------------
+handle 1: console_mp_server.log
+File Handles:
+    localized assets iwd file for english
+/home/cod2/main/localized_english_iw00.iwd (4764 files)
+    localized assets iwd file for english
+/home/cod2/main/localized_english_iw01.iwd (5510 files)
+    localized assets iwd file for english
+/home/cod2/main/localized_english_iw02.iwd (6404 files)
+    localized assets iwd file for english
+/home/cod2/main/localized_english_iw03.iwd (6580 files)
+    localized assets iwd file for english
+/home/cod2/main/localized_english_iw04.iwd (6240 files)
+    localized assets iwd file for english
+/home/cod2/main/localized_english_iw05.iwd (5310 files)
+    localized assets iwd file for english
+/home/cod2/main/localized_english_iw06.iwd (3110 files)
+    localized assets iwd file for english
+/home/cod2/main/localized_english_iw07.iwd (1014 files)
+    localized assets iwd file for english
+/home/cod2/main/localized_english_iw08.iwd (8 files)
+    localized assets iwd file for english
+/home/cod2/main/localized_english_iw09.iwd (98 files)
+    localized assets iwd file for english
+/home/cod2/main/localized_english_iw10.iwd (414 files)
+    localized assets iwd file for english
+/home/cod2/main/localized_english_iw11.iwd (1 files)
+/home/cod2/devraw_shared
+/home/cod2/devraw
+/home/cod2/raw_shared
+/home/cod2/raw
+/home/cod2/.callofduty2/devraw_shared
+/home/cod2/.callofduty2/devraw
+/home/cod2/.callofduty2/raw_shared
+/home/cod2/.callofduty2/raw
+/home/cod2/main
+/home/cod2/main/iw_00.iwd (102 files)
+/home/cod2/main/iw_01.iwd (16 files)
+/home/cod2/main/iw_02.iwd (40 files)
+/home/cod2/main/iw_03.iwd (26 files)
+/home/cod2/main/iw_04.iwd (698 files)
+/home/cod2/main/iw_05.iwd (928 files)
+/home/cod2/main/iw_06.iwd (990 files)
+/home/cod2/main/iw_07.iwd (3384 files)
+/home/cod2/main/iw_08.iwd (2723 files)
+Current search path:
+Current language: english
+----- FS_Startup -----
+Server: mp_toujane
+------ Server Initialization ------
