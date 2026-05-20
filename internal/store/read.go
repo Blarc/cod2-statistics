@@ -79,6 +79,14 @@ type PollStatus struct {
 	Ready        bool       `json:"ready"`
 }
 
+type OpenMatch struct {
+	MatchID   string
+	MapName   string
+	GameType  string
+	StartedAt int
+	LastClock int
+}
+
 func (s *Store) ListMatches(mapName, gameType string, limit, offset int) ([]MatchSummary, int, error) {
 	where, args := buildMatchWhere(mapName, gameType)
 
@@ -123,6 +131,45 @@ func (s *Store) GetLatestMatch() (*MatchSummary, error) {
 		return nil, fmt.Errorf("get latest match: %w", err)
 	}
 	return &m, nil
+}
+
+func (s *Store) GetOpenMatch() (*OpenMatch, error) {
+	rows, err := s.db.Query(`
+		SELECT key, value
+		FROM poll_state
+		WHERE key IN ('open_match_id','open_map_name','open_game_type','open_started_at','open_last_clock')`)
+	if err != nil {
+		return nil, fmt.Errorf("get open match: %w", err)
+	}
+	defer rows.Close()
+
+	state := map[string]string{}
+	for rows.Next() {
+		var key, value string
+		if err := rows.Scan(&key, &value); err != nil {
+			return nil, fmt.Errorf("scan open match state: %w", err)
+		}
+		state[key] = value
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate open match state: %w", err)
+	}
+
+	id := state["open_match_id"]
+	if id == "" {
+		return nil, nil
+	}
+
+	startedAt, _ := strconv.Atoi(state["open_started_at"])
+	lastClock, _ := strconv.Atoi(state["open_last_clock"])
+
+	return &OpenMatch{
+		MatchID:   id,
+		MapName:   state["open_map_name"],
+		GameType:  state["open_game_type"],
+		StartedAt: startedAt,
+		LastClock: lastClock,
+	}, nil
 }
 
 func buildMatchWhere(mapName, gameType string) (string, []any) {

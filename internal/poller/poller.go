@@ -83,22 +83,22 @@ func (p *Poller) pollOnce(ctx context.Context) error {
 	}
 
 	var cont *matcher.Continuation
-	latest, err := p.store.GetLatestMatch()
+	openMatch, err := p.store.GetOpenMatch()
 	if err != nil {
 		_ = p.store.SetLastPollError(err.Error())
-		return fmt.Errorf("get latest match: %w", err)
+		return fmt.Errorf("get open match: %w", err)
 	}
-	if latest != nil {
+	if openMatch != nil {
 		cont = &matcher.Continuation{
-			MatchID:   latest.ID,
-			MapName:   latest.MapName,
-			GameType:  latest.GameType,
-			StartedAt: latest.StartedAt,
-			LastClock: latest.EndedAt,
+			MatchID:   openMatch.MatchID,
+			MapName:   openMatch.MapName,
+			GameType:  openMatch.GameType,
+			StartedAt: openMatch.StartedAt,
+			LastClock: openMatch.LastClock,
 		}
 	}
 
-	matches, err := matcher.ProcessLinesWithContinuation(rls, cont)
+	matches, nextCont, err := matcher.ProcessLinesWithState(rls, cont)
 	if err != nil {
 		_ = p.store.SetLastPollError(err.Error())
 		return fmt.Errorf("process lines: %w", err)
@@ -109,6 +109,21 @@ func (p *Poller) pollOnce(ctx context.Context) error {
 			_ = p.store.SetLastPollError(err.Error())
 			return fmt.Errorf("save match %s: %w", m.ID[:8], err)
 		}
+	}
+
+	var nextOpen *store.OpenMatch
+	if nextCont != nil {
+		nextOpen = &store.OpenMatch{
+			MatchID:   nextCont.MatchID,
+			MapName:   nextCont.MapName,
+			GameType:  nextCont.GameType,
+			StartedAt: nextCont.StartedAt,
+			LastClock: nextCont.LastClock,
+		}
+	}
+	if err := p.store.SetOpenMatch(nextOpen); err != nil {
+		_ = p.store.SetLastPollError(err.Error())
+		return fmt.Errorf("set open match state: %w", err)
 	}
 
 	if err := p.store.SetLastPollNS(time.Now().UnixNano()); err != nil {

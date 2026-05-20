@@ -60,3 +60,45 @@ func TestSaveMatchUpdatesWindowAndMetadata(t *testing.T) {
 		t.Errorf("GameType = %q, want dm", got.GameType)
 	}
 }
+
+func TestOpenMatchStateRoundTrip(t *testing.T) {
+	dbPath := filepath.Join(t.TempDir(), "state.db")
+	st, err := store.New(dbPath)
+	if err != nil {
+		t.Fatalf("store.New: %v", err)
+	}
+	defer st.Close()
+
+	want := &store.OpenMatch{
+		MatchID:   "match-open",
+		MapName:   "mp_toujane",
+		GameType:  "dm",
+		StartedAt: 100,
+		LastClock: 130,
+	}
+	if err := st.SetOpenMatch(want); err != nil {
+		t.Fatalf("SetOpenMatch: %v", err)
+	}
+
+	got, err := st.GetOpenMatch()
+	if err != nil {
+		t.Fatalf("GetOpenMatch: %v", err)
+	}
+	if got == nil {
+		t.Fatal("GetOpenMatch returned nil")
+	}
+	if *got != *want {
+		t.Fatalf("GetOpenMatch = %#v, want %#v", got, want)
+	}
+
+	if err := st.SetOpenMatch(nil); err != nil {
+		t.Fatalf("SetOpenMatch(nil): %v", err)
+	}
+	cleared, err := st.GetOpenMatch()
+	if err != nil {
+		t.Fatalf("GetOpenMatch after clear: %v", err)
+	}
+	if cleared != nil {
+		t.Fatalf("GetOpenMatch after clear = %#v, want nil", cleared)
+	}
+}

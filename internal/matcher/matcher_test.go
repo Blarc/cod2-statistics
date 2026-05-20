@@ -147,6 +147,52 @@ func TestContinuationClockDropStartsNewMatch(t *testing.T) {
 	}
 }
 
+func TestStateClearedOnShutdownGame(t *testing.T) {
+	cont := &matcher.Continuation{
+		MatchID:   "existing-match",
+		MapName:   "mp_toujane",
+		GameType:  "dm",
+		StartedAt: 12898 * 60,
+		LastClock: 12900 * 60,
+	}
+
+	rls := parseRawLines(t, `12900:10 ShutdownGame:`)
+	got, next, err := matcher.ProcessLinesWithState(rls, cont)
+	if err != nil {
+		t.Fatalf("ProcessLinesWithState: %v", err)
+	}
+	if len(got) != 0 {
+		t.Fatalf("matches = %d, want 0 (seed-only shutdown)", len(got))
+	}
+	if next != nil {
+		t.Fatalf("next continuation = %#v, want nil", next)
+	}
+}
+
+func TestStatePreservedWhenNoNewLines(t *testing.T) {
+	cont := &matcher.Continuation{
+		MatchID:   "existing-match",
+		MapName:   "mp_toujane",
+		GameType:  "dm",
+		StartedAt: 12898 * 60,
+		LastClock: 12900 * 60,
+	}
+
+	got, next, err := matcher.ProcessLinesWithState(nil, cont)
+	if err != nil {
+		t.Fatalf("ProcessLinesWithState: %v", err)
+	}
+	if len(got) != 0 {
+		t.Fatalf("matches = %d, want 0", len(got))
+	}
+	if next == nil {
+		t.Fatal("next continuation is nil, want existing state")
+	}
+	if next.MatchID != cont.MatchID || next.LastClock != cont.LastClock {
+		t.Fatalf("next continuation = %#v, want match_id=%q last_clock=%d", next, cont.MatchID, cont.LastClock)
+	}
+}
+
 func TestMalformedLineSkipped(t *testing.T) {
 	input := `12898:14 InitGame: \g_gametype\dm\mapname\mp_toujane\protocol\118
 12898:30 K;0;0;;onlyFiveFields`

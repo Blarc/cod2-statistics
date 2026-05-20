@@ -37,12 +37,20 @@ type Continuation struct {
 // Lines that appear before the first InitGame are assigned to an implicit match
 // with no map/gametype metadata.
 func ProcessLines(lines []*model.RawLine) ([]*model.Match, error) {
-	return ProcessLinesWithContinuation(lines, nil)
+	matches, _, err := ProcessLinesWithState(lines, nil)
+	return matches, err
 }
 
 // ProcessLinesWithContinuation behaves like ProcessLines, but can continue the
 // previous open match across poll boundaries.
 func ProcessLinesWithContinuation(lines []*model.RawLine, cont *Continuation) ([]*model.Match, error) {
+	matches, _, err := ProcessLinesWithState(lines, cont)
+	return matches, err
+}
+
+// ProcessLinesWithState behaves like ProcessLinesWithContinuation and also
+// returns the continuation state for the next poll cycle.
+func ProcessLinesWithState(lines []*model.RawLine, cont *Continuation) ([]*model.Match, *Continuation, error) {
 	var matches []*model.Match
 	var current *matchBuilder
 
@@ -101,7 +109,8 @@ func ProcessLinesWithContinuation(lines []*model.RawLine, cont *Continuation) ([
 
 	matches = appendFinalized(matches, current, prevClock)
 
-	return matches, nil
+	next := buildContinuation(current, prevClock, cont)
+	return matches, next, nil
 }
 
 // matchBuilder accumulates events for one in-progress match.
@@ -163,12 +172,36 @@ func appendFinalized(matches []*model.Match, current *matchBuilder, endClock int
 	if current == nil {
 		return matches
 	}
+	if endClock < 0 {
+		endClock = current.match.StartedAt
+	}
 	m := current.finalise(endClock)
 	// Ignore empty placeholders (e.g., continuation seed with no new events).
 	if current.seeded && len(m.Players) == 0 && len(m.KillEvents) == 0 && len(m.DamageEvents) == 0 && len(m.WeaponEvents) == 0 {
 		return matches
 	}
 	return append(matches, m)
+}
+
+func buildContinuation(current *matchBuilder, prevClock int, prior *Continuation) *Continuation {
+	if current == nil {
+		return nil
+	}
+	lastClock := prevClock
+	if lastClock < 0 {
+		if prior != nil {
+			lastClock = prior.LastClock
+		} else {
+			lastClock = current.match.StartedAt
+		}
+	}
+	return &Continuation{
+		MatchID:   current.match.ID,
+		MapName:   current.match.MapName,
+		GameType:  current.match.GameType,
+		StartedAt: current.match.StartedAt,
+		LastClock: lastClock,
+	}
 }
 
 func (mb *matchBuilder) finalise(endClock int) *model.Match {

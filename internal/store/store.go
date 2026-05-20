@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	_ "modernc.org/sqlite"
 )
@@ -154,6 +155,49 @@ func (s *Store) SaveMatch(m *model.Match) error {
 			VALUES (?, ?, ?, ?, ?)`,
 			m.ID, ev.ClockSec, ev.PlayerNameNorm, ev.Weapon, ev.IdempotencyKey); err != nil {
 			return fmt.Errorf("insert weapon event: %w", err)
+		}
+	}
+
+	return tx.Commit()
+}
+
+func (s *Store) SetOpenMatch(open *OpenMatch) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback() //nolint:errcheck
+
+	keys := []string{
+		"open_match_id",
+		"open_map_name",
+		"open_game_type",
+		"open_started_at",
+		"open_last_clock",
+	}
+
+	if open == nil || open.MatchID == "" {
+		for _, k := range keys {
+			if _, err := tx.Exec(`DELETE FROM poll_state WHERE key = ?`, k); err != nil {
+				return fmt.Errorf("clear open match state %s: %w", k, err)
+			}
+		}
+		return tx.Commit()
+	}
+
+	values := map[string]string{
+		"open_match_id":   open.MatchID,
+		"open_map_name":   open.MapName,
+		"open_game_type":  open.GameType,
+		"open_started_at": strconv.Itoa(open.StartedAt),
+		"open_last_clock": strconv.Itoa(open.LastClock),
+	}
+	for _, k := range keys {
+		if _, err := tx.Exec(
+			`INSERT INTO poll_state(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value`,
+			k, values[k],
+		); err != nil {
+			return fmt.Errorf("set open match state %s: %w", k, err)
 		}
 	}
 
