@@ -41,6 +41,12 @@ func (s *Store) Close() error { return s.db.Close() }
 // itself is skipped but individual events are still attempted via
 // INSERT OR IGNORE, so the call is safe to repeat.
 func (s *Store) SaveMatch(m *model.Match) error {
+
+	// Matches with no players are skipped.
+	if len(m.Players) == 0 {
+		return nil
+	}
+
 	tx, err := s.db.Begin()
 	if err != nil {
 		return err
